@@ -34,17 +34,25 @@ if [ "$(which python)" == "/usr/bin/python" ]
 	fi
 fi
 
-echo "Remove old builds..."
 # Clean up any previous build work
+echo "Remove old builds..."
 rm -rf ./build ./dist
 
-echo "Setup Python Virtual Environment..."
 # Set up and activate virtual environment for dependencies
-python -m venv python_venv #--system-site-packages
+echo "Setup Python Virtual Environment..."
+PY_VER=$(python --version 2>&1)
+if [[ $PY_VER == *"2.7"* ]]
+then
+	pip install virtualenv
+	virtualenv python_venv
+else
+	python -m venv python_venv
+fi
+
 source ./python_venv/bin/activate
 
-echo "Install Dependencies..."
 # Install requirements
+echo "Install Dependencies..."
 pip install -r requirements.txt
 
 # Use system (OSX) python and py2app. Do use not homebrew or another version. 
@@ -70,8 +78,8 @@ python py2app_setup.py py2app --packages=PIL
 echo "Build macOS Disk Image..."
 hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
 
-echo "Clean up and deactivate Python virtual environment..."
 # Clean up the build directory when we are done.
+echo "Clean up and deactivate Python virtual environment..."
 rm -rf build
 
 # Remove virtual environment
