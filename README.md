@@ -32,23 +32,32 @@ You need not read any further in this document. You should be albe to run K40 Wh
 
 ## Rebuilding from Source (macOS)
 
-In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder.
+In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder. See the following sections for details based on your chosen Python version.
 
-If your default `python` is the macOS default system Python, read below. You have work to do first. If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested on `Python 3.7.2` and 'Python 2.7.15`
+If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested *mostly* on `Python 3.7.2` and 'Python 2.7.15` using [pyenv](https://github.com/pyenv/pyenv).
 
-NOTE: When installing Homebrew Python, you should `--enable-framework`.
+NOTE: When installing Python with `pyenv`, you should use the `--enable-framework` flag so that Python can get properly bundled with the application.
 
-### Python 3.7.2 (preferred)
+### Python 3.7.2 (preferred method)
 
-Set up Python 3.7.2. Something like the following
+Set up Python 3.7.2 with HomeBrew and pyenv. Something like the following should work
 
 ```
+# Install HomeBrew (only if you don't have it)
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+# Install Dependencies (only if you haven't done this already)
+brew install libusb
+brew cask install inkscape
+brew install pyenv
+
+# Install Python 3.7.2 with pyenv and set it as the default Python
 PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
 pyenv global 3.7.2
 rehash
 ```
 
-Then a simple build should work
+Then running the build should work. If not, well, there should be a lot of error messages to help you track things down.
 
 ```
 ./build_macOS.sh
@@ -72,21 +81,30 @@ ValueError: character U+6573552f is not in range [U+0000; U+10ffff]
 
 ### Python 2.7.15 (not preferred)
 
-Set up Python 3.7.2. Something like the following
+Set up Python 2.7.15 with HomeBrew and pyenv. Something like the following should work
 
 ```
+# Install HomeBrew (only if you don't have it)
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+# Install Dependencies (only if you haven't done this already)
+brew install libusb
+brew cask install inkscape
+brew install pyenv
+
+# Install Python 2.7.15 with pyenv and set it as the default Python
 PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 2.7.15
 pyenv global 2.7.15
 rehash
 ```
 
-Then a simple build should work
+Then running the build should work. If not, well, there should be a lot of error messages to help you track things down.
 
 ```
 ./build_macOS.sh
 ```
 
-NOTE: This gets a similar 'Mach-O' error as 3.7.2. See above. Still seems to work.
+NOTE: This gets a similar 'Mach-O' error as 3.7.2. See above. Still seems to work. Less tested than the Python 3.7 versions.
 
 ### macOS System Python (not preferred)
 
@@ -105,7 +123,7 @@ Solution:
 
 You need to do that before this will work!
 
-I've been able to compile everything on a freshly installed macOS 10.14.2 (January 2019) system after installing the dependencies listed below.
+I've was able to compile everything on a freshly installed macOS 10.14.2 (January 2019) system after installing the dependencies listed below. I haven't really tested this method extensively and have made code changes since it worked. Use at your own risk.
 
 ## macOS Build Notes
 
@@ -114,16 +132,18 @@ This fork adds the following files to Scorch's work
 * `build_macOS.sh` -- bash build script to build and create application bundle.
 * `update_macOS.sh` -- bash script to patch a new version of K40 Whisperer and bundle it.
 * `py2app_setup.py` -- `py2app` setup script that creates the application bundle.
-* `K40-Whisperer-Icon.*` -- Icons for macOS application bundle.
+* `K40-Whisperer-Icon.*` -- Icons for macOS application bundle (see below note)
 * `macOS.patch` -- tweaks to Scorch's source for macOS
 
 When a new source package is released by Scorch, the general update process is.
 
-* Download and extract the new source code
-* Check this repository out into a working directory
-* Run `update_macOS.sh`
-* *poof* out comes a disk image (`.dmg` file) with the new bundled version.
-* Don't forget to test it!
+1. Download and extract the new source code
+2. Check this repository out into a working directory
+3. Run `update_macOS.sh`
+4. *poof* out comes a disk image (`.dmg` file) with the new bundled version.
+5. Don't forget to test it!
+
+Here's my typing... and my likely future copy and paste.
 
 ```
 # Get Scorch's code
