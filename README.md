@@ -6,31 +6,56 @@ Packaging of Scorchworks K40 Whisperer as an OSX Application.
 
 The official K40 Whisperer and instructions are at Scorchworks:
 
-    [http://www.scorchworks.com/K40whisperer/k40whisperer.html][http://www.scorchworks.com/K40whisperer/k40whisperer.html]
+> http://www.scorchworks.com/K40whisperer/k40whisperer.html
 
 This fork is merely to add packaging for macOS systems, creating a clickable application that can be installed on any macOS system. This eliminates having to run K40 Whisperer from a Terminal prompt.
 
-## macOS Build
+## Running The Packaged Application
 
-This fork adds the following files to Scorch's work
+K40 Whisperer requires a few dependencies that are not installed as part of the application bundle. You will need to install these yourself to have a functioning application.
 
-* `build_macOS.sh` -- bash build script to build and create application bundle.
-* `py2app_setup.py` -- `py2app` setup script that creates the application bundle.
-* `K40-Whisperer-Icon.*` -- Icons for macOS application bundle.
+* [libusb](https://libusb.info) for access to the USB port(s)
+* [inkscape](https://inkscape.org) for drawing and rasterization
 
-## Compiling
+The dependencies are best installed with [Homebrew](https://brew.sh/) in a `Terminal` window as follows
 
-In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder.
+```
+# Install HomeBrew (only if you don't have it)
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-If your default `python` is the macOS default system Python, read below. You have work to do first. If you are using one of the most excellent [Homebrew][https://brew.sh/] versions of Python, you are not only a wonderful person, but life will be easy for you. This build has been tested on `Python 3.7.2` and 'Python 2.7.15`
+# Install Dependencies
+brew install libusb
+brew cask install inkscape
+```
+
+You need not read any further in this document. You should be albe to run K40 Whisperer.
+
+## Rebuilding from Source (macOS)
+
+In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder. It will also create a disk image (`.dmg` file) that can be mounted or shared with others.
+
+If your default `python` is the macOS default system Python, read below. You have work to do first. If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested on `Python 3.7.2` and 'Python 2.7.15`
 
 NOTE: When installing Homebrew Python, you should `--enable-framework`.
+
+### Python 3.7.2 (preferred)
 
 ```
 PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
 ```
 
-### Using The macOS System Default Python
+### Python 3.6
+
+Compiling with `py2app-0.18` under Homebrew Python 3.6.6 results in:
+```
+ValueError: character U+6573552f is not in range [U+0000; U+10ffff]
+```
+
+This does not happen under 3.7.2. 
+
+### Python 2.7.15 (not preferred)
+
+### macOS System Python (not preferred)
 
 If you build K40 Whisperer with the default system Python there are a few complications with compilation that are not (cannot be) addressed directly in the `build_macOS.sh` script and need to be handled manually before compiling. These stem from the _System Integrity Protection_ on macOS (since 10.10) and the system Python packager, `py2app`.
 
@@ -49,22 +74,25 @@ You need to do that before this will work!
 
 I've been able to compile everything on a freshly installed macOS 10.14.2 (January 2019) system after installing the dependencies listed below.
 
-### Python 3.6
 
-Compiling with `py2app-0.18` under Homebrew Python 3.6.6 results in:
-```
-ValueError: character U+6573552f is not in range [U+0000; U+10ffff]
-```
+## macOS Build Notes
 
-This does not happen under 3.7.2.
+This fork adds the following files to Scorch's work
 
+* `build_macOS.sh` -- bash build script to build and create application bundle.
+* `py2app_setup.py` -- `py2app` setup script that creates the application bundle.
+* `K40-Whisperer-Icon.*` -- Icons for macOS application bundle.
+* `macOS.patch` -- tweaks to Scorch's source for macOS
 
+### Button Text Doesn't Wrap Properly
 
-## Known Problems (and some fixes)
+Button text does not wrap properly on macOS tkinter. My simple solution is to...
 
-Button text does not wrap properly
+* specify a `wraplength` for `Open` and `Reload` 
+* shorten the text for `Raster Engrave` and `Vector Engrave` buttons
 
-~477
+The following goes in somewhere around line 477 in `k40_whisperer.py`. The `.patch` file has the details.
+
 ```
 # Adjust button wrap locations for macOS
 self.Open_Button.config(wraplength=20)
@@ -73,11 +101,16 @@ self.Reng_Button.config(text="Raster Eng.")
 self.Veng_Button.config(text="Vector Eng.")
 ```
 
+The `Save` button on the `General Settings` has a similar problem. Around line 3872.
+
+```
+w_entry=50
+```
+
 ### Buttons are Blank
 
-macOS Majove has a strange Tkinter problem where button text is blank until you resize the application window.
-
-A simple code fix from StackOverflow [button text of tkinter not works in mojave][https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave] is as follows. This was tested on macOS 10.14.2 with Python 2.7.14 and Python 3.7.2.
+macOS Majove has a strange Tkinter problem where button text is blank until you resize the application window with Python 3.7.2. I don't see the same problem with Python 2.7.15. A simple code fix from StackOverflow [button text of tkinter not works in mojave][https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave] is as follows. 
+This was tested on macOS 10.14.2 with Python 2.7.14 and Python 3.7.2.
 
 ```
 # START CHANGES
@@ -91,6 +124,16 @@ root.update()
 root.after(0, fix)
 # END CHANGES
 tkinter.mainloop()
+```
+
+This one is not yet in the `.patch` file.
+
+## macOS Development Notes
+
+To create a new patch file to be used by `update-macOS.sh`, when needed, which should be rarely:
+
+```
+diff -Naur k40_whisperer.py ~/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py >  macOS.patch
 ```
 
 ### The .icns Icon file
