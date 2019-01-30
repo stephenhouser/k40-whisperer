@@ -4343,4 +4343,24 @@ if LOAD_MSG != "":
     message_box("K40 Whisperer",LOAD_MSG)
 debug_message("Debuging is turned on.")
 
+# macOS Mojave and tikinter buttons are blank
+# https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave]
+def macOS_majove_fix():
+    a = root.winfo_geometry().split('+')[0]
+    b = a.split('x')
+    w = int(b[0])
+    h = int(b[1])
+    root.geometry('%dx%d' % (w+1,h+1))
+
+# Check for macOS >= 10.14
+try:
+    import platform
+    v, _, _ = platform.mac_ver()
+    v = float('.'.join(v.split('.')[:2]))
+    if v >= 10.14:
+        root.update()
+        root.after(0, macOS_majove_fix)
+except:
+    pass
+
 root.mainloop()

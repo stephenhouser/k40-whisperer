@@ -1,5 +1,5 @@
 --- /Users/houser/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py	2019-01-14 18:37:32.000000000 -0500
-+++ k40_whisperer.py	2019-01-29 20:54:47.000000000 -0500
++++ k40_whisperer.py	2019-01-30 13:17:52.000000000 -0500
 @@ -472,7 +472,13 @@
          self.gotoY.trace_variable("w", self.Entry_GoToY_Callback)
          
@@ -24,8 +24,33 @@
          w_units=35
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5
+@@ -4337,4 +4343,24 @@
+     message_box("K40 Whisperer",LOAD_MSG)
+ debug_message("Debuging is turned on.")
+ 
++# macOS Mojave and tikinter buttons are blank
++# https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave]
++def macOS_majove_fix():
++    a = root.winfo_geometry().split('+')[0]
++    b = a.split('x')
++    w = int(b[0])
++    h = int(b[1])
++    root.geometry('%dx%d' % (w+1,h+1))
++
++# Check for macOS >= 10.14
++try:
++    import platform
++    v, _, _ = platform.mac_ver()
++    v = float('.'.join(v.split('.')[:2]))
++    if v >= 10.14:
++        root.update()
++        root.after(0, macOS_majove_fix)
++except:
++    pass
++
+ root.mainloop()
 --- /Users/houser/Downloads/K40_Whisperer-0.29_src/windowsinhibitor.py	2019-01-13 21:58:38.000000000 -0500
-+++ windowsinhibitor.py	2019-01-29 20:41:23.000000000 -0500
++++ windowsinhibitor.py	2019-01-29 10:51:44.000000000 -0500
 @@ -51,6 +51,6 @@
      while d_time < 20:
          time.sleep(5)
