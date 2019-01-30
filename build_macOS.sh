@@ -58,6 +58,8 @@ pip install -r requirements.txt
 echo "Build macOS Application Bundle..."
 python py2app_setup.py py2app --packages=PIL
 
+echo "Copy support files..."
+cp Change_Log.txt gpl-3.0.txt README_MacOS.md dist
 #echo "Build macOS Disk Image..."
 #hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
 

@@ -60,5 +60,6 @@ echo "Build macOS Application..."
 
 # Make macOS Disk Image (.dmg) for distribution
 echo "Build macOS Disk Image..."
+rm ./K40-Whisperer-${VERSION}.dmg
 hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
 
