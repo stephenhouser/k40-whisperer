@@ -55,28 +55,11 @@ source ./python_venv/bin/activate
 echo "Install Dependencies..."
 pip install -r requirements.txt
 
-# Use system (OSX) python and py2app. Do use not homebrew or another version. 
-# This ensures things will work on other people's computers who might not
-# have great tools like homebrew installed.
-#
-# There's a permission problem since 10.10 with the default system py2app:
-# http://stackoverflow.com/questions/33197412/py2app-operation-not-permitted
-# https://forums.developer.apple.com/thread/6987
-#
-# Solution:
-#   - Boot in recovery mode
-#   - csrutil disable
-#   - Reboot
-#   - sudo chflags -R norestricted /System/Library/Frameworks/Python.framework
-#   - Reboot into recovery mode
-#   - csrutil enable
-#   - Reboot and build...
-# You need to do that before this will work!
 echo "Build macOS Application Bundle..."
 python py2app_setup.py py2app --packages=PIL
 
-echo "Build macOS Disk Image..."
-hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
+#echo "Build macOS Disk Image..."
+#hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
 
 # Clean up the build directory when we are done.
 echo "Clean up and deactivate Python virtual environment..."

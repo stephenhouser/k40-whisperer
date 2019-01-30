@@ -32,7 +32,7 @@ You need not read any further in this document. You should be albe to run K40 Wh
 
 ## Rebuilding from Source (macOS)
 
-In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder. It will also create a disk image (`.dmg` file) that can be mounted or shared with others.
+In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder.
 
 If your default `python` is the macOS default system Python, read below. You have work to do first. If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested on `Python 3.7.2` and 'Python 2.7.15`
 
@@ -40,20 +40,53 @@ NOTE: When installing Homebrew Python, you should `--enable-framework`.
 
 ### Python 3.7.2 (preferred)
 
+Set up Python 3.7.2. Something like the following
+
 ```
 PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
+pyenv global 3.7.2
+rehash
+```
+
+Then a simple build should work
+
+```
+./build_macOS.sh
+```
+
+NOTE: I get the error below from `py2app` but the application bundle still seems to function properly. Please do let me know if you know how to solve this one. It seems I need to install Python in a deeper path on my system so the `macho` header can be rewritten properly. I haven't tried this yet.
+
+```
+ValueError: New Mach-O header is too large to relocate in ... dist/K40 Whisperer.app/Contents/Resources/lib/python3.7/PIL/.dylibs/liblcms2.2.dylib' (new size=1688, max size=1680, delta=48)
 ```
 
 ### Python 3.6
 
+Don't.
+
 Compiling with `py2app-0.18` under Homebrew Python 3.6.6 results in:
+
 ```
 ValueError: character U+6573552f is not in range [U+0000; U+10ffff]
 ```
 
-This does not happen under 3.7.2. 
-
 ### Python 2.7.15 (not preferred)
+
+Set up Python 3.7.2. Something like the following
+
+```
+PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 2.7.15
+pyenv global 2.7.15
+rehash
+```
+
+Then a simple build should work
+
+```
+./build_macOS.sh
+```
+
+NOTE: This gets a similar 'Mach-O' error as 3.7.2. See above. Still seems to work.
 
 ### macOS System Python (not preferred)
 
@@ -62,18 +95,17 @@ If you build K40 Whisperer with the default system Python there are a few compli
 A solution that has worked for my system is documented on Stack Overflow in [py2app Operation Not Permitted][http://stackoverflow.com/questions/33197412/py2app-operation-not-permitted] and there is a detailed discusson on [Apple's Developer Forums][https://forums.developer.apple.com/thread/6987].
 
 Solution:
+* Boot in recovery mode and open a command-line or Terminal
+* Run `csrutil disable`
+* Reboot and open a command-line or Terminal
+* Run `sudo chflags -R norestricted /System/Library/Frameworks/Python.framework`
+* Reboot into recovery mode and open a command-line or Terminal
+* Run `csrutil enable`
+* Reboot and build...
 
-Boot in recovery mode and open a command-line or Terminal
-Run csrutil disable
-Reboot and open a command-line or Terminal
-Run sudo chflags -R norestricted /System/Library/Frameworks/Python.framework
-Reboot into recovery mode and open a command-line or Terminal
-Run csrutil enable
-Reboot and build...
 You need to do that before this will work!
 
 I've been able to compile everything on a freshly installed macOS 10.14.2 (January 2019) system after installing the dependencies listed below.
-
 
 ## macOS Build Notes
 
