@@ -59,9 +59,7 @@ echo "Build macOS Application Bundle..."
 python py2app_setup.py py2app --packages=PIL
 
 echo "Copy support files..."
-cp Change_Log.txt gpl-3.0.txt README_MacOS.md dist
-#echo "Build macOS Disk Image..."
-#hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
+cp k40_whisperer_test.svg Change_Log.txt gpl-3.0.txt README_MacOS.md dist
 
 # Clean up the build directory when we are done.
 echo "Clean up and deactivate Python virtual environment..."
@@ -70,5 +68,10 @@ rm -rf build
 # Remove virtual environment
 deactivate
 rm -rf python_venv
+
+# Buid a new disk image
+echo "Build macOS Disk Image..."
+rm ./K40-Whisperer-${VERSION}.dmg
+hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
 
 echo "Done."
