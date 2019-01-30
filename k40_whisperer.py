@@ -90,9 +90,33 @@ except:
 
 QUIET = False
 
+# macOS Mojave and tikinter buttons are blank
+# https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave]
+# Essentially the fix is to slightly resize the window after it opens.
+macOS_button_fix_enabled = False
 
-    
-    
+def macOS_button_fix(win):
+    def make_window_resizer(w):
+        def window_resizer():
+            a = w.winfo_geometry().split('+')[0]
+            (width, height) = a.split('x')
+            w.geometry('%dx%d' % (int(width)+1, int(height)+1))
+
+        return window_resizer
+
+    # The fix causes a bit of flicker on startup, so only run it for macOS >= 10.14
+    # Check for macOS >= 10.14
+    if macOS_button_fix_enabled:
+        try:
+            import platform
+            v, _, _ = platform.mac_ver()
+            v = float('.'.join(v.split('.')[:2]))
+            if v >= 10.14:
+                win.update()
+                win.after(0, make_window_resizer(win))
+        except:
+            pass
+
 ################################################################################
 class Application(Frame):
     def __init__(self, master):
@@ -3137,6 +3161,7 @@ class Application(Frame):
                                   U_display))
 
         self.statusbar.configure( bg = 'white' )
+        macOS_button_fix(root)
         
     def menu_Mode_Change_Callback(self, varName, index, mode):
         self.menu_View_Refresh()
@@ -4011,6 +4036,8 @@ class Application(Frame):
         self.GEN_Close = Button(gen_settings,text="Close",command=self.Close_Current_Window_Click)
         self.GEN_Close.place(x=Xbut, y=Ybut, width=130, height=30, anchor="center")
 
+        macOS_button_fix(gen_settings)
+
     ################################################################################
     #                          Raster Settings Window                              #
     ################################################################################
@@ -4150,6 +4177,7 @@ class Application(Frame):
         self.bezier_M1_Callback()
         self.Set_Input_States_RASTER()
 
+        macOS_button_fix(raster_settings)
 
 
 
@@ -4220,8 +4248,10 @@ class Application(Frame):
             
         self.EGV_Send = Button(egv_send,text="Send EGV Data",command=Close_and_Send_Click)
         self.EGV_Send.place(x=Xbut, y=Ybut, width=130, height=30, anchor="w")
+
+        macOS_button_fix(egv_send)
         ################################################################################
-        
+
         
 ################################################################################
 #             Function for outputting messages to different locations          #
@@ -4343,24 +4373,6 @@ if LOAD_MSG != "":
     message_box("K40 Whisperer",LOAD_MSG)
 debug_message("Debuging is turned on.")
 
-# macOS Mojave and tikinter buttons are blank
-# https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave]
-def macOS_majove_fix():
-    a = root.winfo_geometry().split('+')[0]
-    b = a.split('x')
-    w = int(b[0])
-    h = int(b[1])
-    root.geometry('%dx%d' % (w+1,h+1))
-
-# Check for macOS >= 10.14
-try:
-    import platform
-    v, _, _ = platform.mac_ver()
-    v = float('.'.join(v.split('.')[:2]))
-    if v >= 10.14:
-        root.update()
-        root.after(0, macOS_majove_fix)
-except:
-    pass
-
+macOS_button_fix_enabled = True
+macOS_button_fix(root)
 root.mainloop()

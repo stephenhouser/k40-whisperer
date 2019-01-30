@@ -25,10 +25,11 @@ The dependencies are best installed with [Homebrew](https://brew.sh/) in a `Term
 
 # Install Dependencies
 brew install libusb
+brew cask install xquartz
 brew cask install inkscape
 ```
 
-You need not read any further in this document. You should be albe to run K40 Whisperer.
+You need not read any further in this document. You should be able to run K40 Whisperer.
 
 ## Rebuilding from Source (macOS)
 
@@ -48,6 +49,7 @@ Set up Python 3.7.2 with HomeBrew and pyenv. Something like the following should
 
 # Install Dependencies (only if you haven't done this already)
 brew install libusb
+brew cask install xquartz
 brew cask install inkscape
 brew install pyenv
 
