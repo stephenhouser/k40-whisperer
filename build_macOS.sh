@@ -36,14 +36,14 @@ fi
 
 # Clean up any previous build work
 echo "Remove old builds..."
-rm -rf ./build ./dist
+rm -rf ./build ./dist *.pyc
 
 # Set up and activate virtual environment for dependencies
 echo "Setup Python Virtual Environment..."
 PY_VER=$(python --version 2>&1)
 if [[ $PY_VER == *"2.7"* ]]
 then
-	pip install virtualenv
+	pip install virtualenv py2app==0.16
 	virtualenv python_venv
 else
 	python -m venv python_venv

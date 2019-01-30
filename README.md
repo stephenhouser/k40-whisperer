@@ -62,6 +62,16 @@ This does not happen under 3.7.2.
 
 ## Known Problems (and some fixes)
 
+Button text does not wrap properly
+
+~477
+```
+# Adjust button wrap locations for macOS
+self.Open_Button.config(wraplength=20)
+self.Reload_Button.config(wraplength=20)
+self.Reng_Button.config(text="Raster Eng.")
+self.Veng_Button.config(text="Vector Eng.")
+```
 
 ### Buttons are Blank
 

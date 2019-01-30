@@ -472,7 +472,13 @@ class Application(Frame):
         self.gotoY.trace_variable("w", self.Entry_GoToY_Callback)
         
         self.Label_GoToX   = Label(self.master,text="X", anchor=CENTER )
-        self.Label_GoToY   = Label(self.master,text="Y", anchor=CENTER )
+        self.Label_GoToY = Label(self.master, text="Y", anchor=CENTER)
+        
+        # Adjust button wrap locations for macOS
+        self.Open_Button.config(wraplength=20)
+        self.Reload_Button.config(wraplength=20)
+        self.Reng_Button.config(text="Raster Eng.")
+        self.Veng_Button.config(text="Vector Eng.")
         ###########################################################################
         # End Left Column #
 
