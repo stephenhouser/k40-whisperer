@@ -134,7 +134,7 @@ This fork adds the following files to Scorch's work
 * `build_macOS.sh` -- bash build script to build and create application bundle.
 * `update_macOS.sh` -- bash script to patch a new version of K40 Whisperer and bundle it.
 * `py2app_setup.py` -- `py2app` setup script that creates the application bundle.
-* `K40-Whisperer-Icon.*` -- Icons for macOS application bundle (see below note)
+* `emblem.icns` -- Icons for macOS application bundle (made with `sips`)
 * `macOS.patch` -- tweaks to Scorch's source for macOS
 
 When a new source package is released by Scorch, the general update process is.
