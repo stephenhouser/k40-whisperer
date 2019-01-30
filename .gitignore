@@ -1,0 +1,5 @@
+.eggs
+*.img
+*.pyc
+dist/
+build/
