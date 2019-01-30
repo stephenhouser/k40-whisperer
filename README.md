@@ -255,17 +255,3 @@ then I can patch it into py2app_setup.py
 'argv_emulation': False,
             'argv_inject': ['--fontdir', '/Library/Fonts', '--defdir', '~/Documents'],
 ```
-
-
-
-### The .icns Icon file
-
-I came up with the Icon file for the app as Scorch does not yet have one in his distribution. The original Photoshop file and a PNG are included in this repository.
-
-The original [Laser Symbol](https://commons.wikimedia.org/wiki/File:Laser-symbol.svg) is from Wiki Media Commons. The modifications are by me [Stephen Houser][https://stephenhouser.com] plopping Scorch's icon on there and masking out
-
-[Using sips to create an icns file from a png file](https://stackoverflow.com/questions/44506713/using-sips-to-create-an-icns-file-from-a-png-file)
-
-```
-sips -s format icns K40-Whisperer-Icon.png --out K40-Whisperer-Icon.icns
-```
