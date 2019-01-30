@@ -193,7 +193,7 @@ This one is not yet in the `.patch` file.
 To create a new patch file to be used by `update-macOS.sh`, when needed, which should be rarely:
 
 ```
-diff -Naur k40_whisperer.py ~/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py >  macOS.patch
+diff -Naur ~/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py k40_whisperer.py >  macOS.patch
 ```
 
 ### The .icns Icon file
