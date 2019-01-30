@@ -1,27 +1,27 @@
---- k40_whisperer.py	2019-01-29 19:49:15.000000000 -0500
-+++ /Users/houser/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py	2019-01-14 18:37:32.000000000 -0500
-@@ -472,13 +472,7 @@
+--- /Users/houser/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py	2019-01-14 18:37:32.000000000 -0500
++++ k40_whisperer.py	2019-01-29 20:44:30.000000000 -0500
+@@ -472,7 +472,13 @@
          self.gotoY.trace_variable("w", self.Entry_GoToY_Callback)
          
          self.Label_GoToX   = Label(self.master,text="X", anchor=CENTER )
--        self.Label_GoToY = Label(self.master, text="Y", anchor=CENTER)
--        
--        # Adjust button wrap locations for macOS
--        self.Open_Button.config(wraplength=20)
--        self.Reload_Button.config(wraplength=20)
--        self.Reng_Button.config(text="Raster Eng.")
--        self.Veng_Button.config(text="Vector Eng.")
-+        self.Label_GoToY   = Label(self.master,text="Y", anchor=CENTER )
+-        self.Label_GoToY   = Label(self.master,text="Y", anchor=CENTER )
++        self.Label_GoToY = Label(self.master, text="Y", anchor=CENTER)
++        
++        # Adjust button wrap locations for macOS
++        self.Open_Button.config(wraplength=20)
++        self.Reload_Button.config(wraplength=20)
++        self.Reng_Button.config(text="Raster Eng.")
++        self.Veng_Button.config(text="Vector Eng.")
          ###########################################################################
          # End Left Column #
  
-@@ -3869,8 +3863,7 @@
+@@ -3863,7 +3869,8 @@
          xd_label_L = 12
  
          w_label=150
--        #w_entry=40
--        w_entry=50
-+        w_entry=40
+-        w_entry=40
++        #w_entry=40
++        w_entry=50
          w_units=35
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5

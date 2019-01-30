@@ -56,7 +56,7 @@ sed -i.orig "s/app_version = .*/app_version = \"${VERSION}\"/" py2app_setup.py
 
 # Build macOS application
 echo "Build macOS Application..."
-./build.sh
+./build_macOS.sh
 
 # Make macOS Disk Image (.dmg) for distribution
 echo "Build macOS Disk Image..."
