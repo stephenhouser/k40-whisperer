@@ -112,9 +112,37 @@ I've been able to compile everything on a freshly installed macOS 10.14.2 (Janua
 This fork adds the following files to Scorch's work
 
 * `build_macOS.sh` -- bash build script to build and create application bundle.
+* `update_macOS.sh` -- bash script to patch a new version of K40 Whisperer and bundle it.
 * `py2app_setup.py` -- `py2app` setup script that creates the application bundle.
 * `K40-Whisperer-Icon.*` -- Icons for macOS application bundle.
 * `macOS.patch` -- tweaks to Scorch's source for macOS
+
+When a new source package is released by Scorch, the general update process is.
+
+* Download and extract the new source code
+* Check this repository out into a working directory
+* Run `update_macOS.sh`
+* *poof* out comes a disk image (`.dmg` file) with the new bundled version.
+* Don't forget to test it!
+
+```
+# Get Scorch's code
+wget https://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
+unzip K40_Whisperer-0.29_src.zip
+
+# Clone this repo
+git clone https://github.com/stephenhouser/k40_whisperer.git
+cd k40_whisperer
+
+# Update...
+./update_macOS.sh ../K40_Whisperer-0.29_src
+
+# If all works, commit and push back to GitHub
+git commit -a -m"Update to v0.29"
+git push
+git tag v0.29
+git push --tags
+```
 
 ### Button Text Doesn't Wrap Properly
 
