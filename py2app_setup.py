@@ -20,7 +20,7 @@ if sys.platform == 'darwin':
         setup_requires=['py2app'],
         #python_requires='>=2.7, <3',
         options=dict(py2app = {
-            'iconfile': 'K40-Whisperer-Icon.icns',
+            'iconfile': 'emblem.icns',
             'includes': ['lxml.etree', 'lxml._elementpath', 'gzip'],
             'resources': ['right.png','left.png','up.png','down.png',
                           'UL.png','UR.png','LR.png','LL.png','CC.png'],
