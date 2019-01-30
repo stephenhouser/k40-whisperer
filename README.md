@@ -189,7 +189,7 @@ w_entry=50
 
 ### Buttons are Blank
 
-macOS Majove has a strange Tkinter problem where button text is blank until you resize the application window with Python 3.7.2. I don't see the same problem with Python 2.7.15. A simple code fix from StackOverflow [button text of tkinter not works in mojave][https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave] is as follows. 
+macOS Majove has a strange Tkinter problem where button text is blank until you resize the application window with Python 3.7.2. I don't see the same problem with Python 2.7.15. A simple code fix from StackOverflow [button text of tkinter not works in mojave][https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave] is as follows.
 This was tested on macOS 10.14.2 with Python 2.7.14 and Python 3.7.2.
 
 ```
@@ -200,6 +200,7 @@ def fix():
     w = int(b[0])
     h = int(b[1])
     root.geometry('%dx%d' % (w+1,h+1))
+    
 root.update()
 root.after(0, fix)
 # END CHANGES
@@ -220,6 +221,42 @@ do
     diff -Naur ~/Downloads/K40_Whisperer-0.29_src/$i $i >> macOS.patch
 done
 ```
+
+### Presetting where inkscape is
+
+somewhere around line 658, enable a command line option
+```
+   opts, args = None, None
+        try:
+            opts, args = getopt.getopt(sys.argv[1:], "ho:",["help", "other_option"])
+        except:
+            debug_message('Unable interpret command line options')
+            sys.exit()
+##        for option, value in opts:
+##            if option in ('-h','--help'):
+##                fmessage(' ')
+##                fmessage('Usage: python .py [-g file]')
+##                fmessage('-o    : unknown other option (also --other_option)')
+##                fmessage('-h    : print this help (also --help)\n')
+##                sys.exit()
+##            if option in ('-o','--other_option'):
+##                pass
+```
+
+that will set 
+
+```
+self.inkscape_path.set(newfontdir.encode("utf-8"))
+```
+
+then I can patch it into py2app_setup.py
+
+```
+'argv_emulation': False,
+            'argv_inject': ['--fontdir', '/Library/Fonts', '--defdir', '~/Documents'],
+```
+
+
 
 ### The .icns Icon file
 
