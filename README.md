@@ -144,42 +144,32 @@ When a new source package is released by Scorch, the general update process is.
 
 1. Download and extract the new source code
 2. Check this repository out into a working directory
-3. Run `update_macOS.sh`
+3. Run `update_macOS.sh` with the address of the latest source archive
 4. *poof* out comes a disk image (`.dmg` file) with the new bundled version.
 5. Don't forget to test it!
 
 Here's my typing... and my likely future copy and paste.
 
 ```
-# Get Scorch's code
-wget https://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
-unzip K40_Whisperer-0.29_src.zip
-
-# Clone this repo
+# Get this repository
 git clone https://github.com/stephenhouser/k40_whisperer.git
 cd k40_whisperer
 
-# Update...
-./update_macOS.sh ../K40_Whisperer-0.29_src
+# Download, apply patches, build the application
+./update_macOS.sh https://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
 
-# Testing...(needs some work)
+# Test/Fix/Test...(needs some work)
+...
 open ./dist/K40\ Whisperer.app
+...
 
-# Fixing...
-
-# Generate new Patch file
-rm macOS.patch
-#for i in k40_whisperer.py windowsinhibitor.py
-for i in *.py
-do
-    diff -Naur ../K40_Whisperer-0.29_src/$i $i >> macOS.patch
-done
+# Move newly generated patch file into place
+mv macOS-0.29.patch macOS.patch
 
 # Commit and push back to GitHub
 git commit -a -m"Update to v0.29"
-git push
 git tag v0.29
-git push --tags
+git push --follow-tags
 ```
 
 ### Button Text Doesn't Wrap Properly
@@ -226,15 +216,3 @@ tkinter.mainloop()
 ```
 
 A variant of this is included in the patch file.
-
-## macOS Development Notes
-
-To create a new patch file to be used by `update-macOS.sh`, when needed. Q: Should this be done every version update? I think maybe.
-
-```
-rm macOS.patch
-for i in k40_whisperer.py windowsinhibitor.py
-do
-    diff -Naur ~/Downloads/K40_Whisperer-0.29_src/$i $i >> macOS.patch
-done
-```
