@@ -8,12 +8,14 @@
 VERBOSE=false
 MAKE_DISK=false
 KEEP_VENV=false
+SETUP_ENVIRONMENT=false
 while getopts "hvde" OPTION; do
 	case "$OPTION" in
 		h)  echo "Options:"
 			echo "\t-h Print help (this)"
 			echo "\t-v Verbose output"
 			echo "\t-e Keep Python virtual environment (don't delete)"
+			echo "\t-s Setup dev environment"
 			echo "\t-d Make disk image (.dmg)"
 			exit 0
 			;;
@@ -23,11 +25,30 @@ while getopts "hvde" OPTION; do
 			;;
 		e)  KEEP_VENV=true
 			;;
+		s)  SETUP_ENVIRONMENT=true
+			;;
 		*)  echo "Incorrect option provided"
 			exit 1
 			;;
     esac
 done
+
+# *** Not Tested! ***
+if [ "$SETUP_ENVIRONMENT" = true ]
+then
+	# Install HomeBrew (only if you don't have it)
+	#/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+	# Install Dependencies
+	brew install libusb
+	brew install pyenv
+	eval "$(pyenv init -)"
+
+	# Install Python 3.7.2 with pyenv and set it as the default Python
+	PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
+	pyenv global 3.7.2
+	rehash
+fi
 
 echo "Validate environment..."
 

@@ -18,6 +18,24 @@ files="gpl-3.0.txt Change_Log.txt README_Linux.txt README_MacOS.md \
 		simplestyle.py simpletransform.py svg_reader.py windowsinhibitor.py"
 
 UPDATE_DIR=$1
+
+# http://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
+DOWNLOAD=true
+if [ "$DOWNLOAD" = true ]
+then
+	URL=$1
+	ZIPFILE=$(echo $URL | rev | cut -f1 -d/ | rev)
+	UPDATE_DIR=$(basename $SRC .zip)
+	echo ZIPFILE=$ZIPFILE
+	echo UPDATE_DIR=$UPDATE_DIR
+	curl -qo $ZIPFILE $URL
+	unzip -q $ZIPFILE
+
+	rm -rf $UPDATE_DIR
+	rm -rf $ZIPFILE
+	exit 
+fi
+
 if [ ! -f ${UPDATE_DIR}/k40_whisperer.py ] ; then
 	echo "K40 Whisperer does not exist at \$1 = ${UPDATE_DIR}!"
 	exit

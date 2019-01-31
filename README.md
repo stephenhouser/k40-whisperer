@@ -2,22 +2,25 @@
 
 Packaging of Scorchworks K40 Whisperer as an OSX Application.
 
-    K40 Whisperer is an alternative to the the Laser Draw (LaserDRW) program that comes with the cheap Chinese laser cutters available on E-Bay and Amazon. K40 Whisperer reads SVG and DXF files, interprets the data and sends commands to the K40 controller to move the laser head and control the laser accordingly. K40 Whisperer does not require a USB key (dongle) to function.
+> K40 Whisperer is an alternative to the the Laser Draw (LaserDRW) program that comes with the cheap Chinese laser cutters available on E-Bay and Amazon. K40 Whisperer reads SVG and DXF files,interprets the data and sends commands to the K40 controller to move the laser head and control the laser accordingly. K40 Whisperer does not require a USB key (dongle) to function.
+
+![K40 Whisperer Main](K40 Whisperer Main.png)
 
 The official K40 Whisperer and instructions are at Scorchworks:
 
 > http://www.scorchworks.com/K40whisperer/k40whisperer.html
 
-This fork is merely to add packaging for macOS systems, creating a clickable application that can be installed on any macOS system. This eliminates having to run K40 Whisperer from a Terminal prompt.
+This fork is to add packaging and minor fixes to work on macOS systems, creating a clickable application that can be installed on any macOS system. This eliminates having to run K40 Whisperer from a Terminal prompt.
 
 ## Running The Packaged Application
 
 K40 Whisperer requires a few dependencies that are not installed as part of the application bundle. You will need to install these yourself to have a functioning application.
 
+* [Homebrew](https://brew.sh/) Not required but **strongly recomended**
 * [libusb](https://libusb.info) for access to the USB port(s)
 * [inkscape](https://inkscape.org) for drawing and rasterization
 
-The dependencies are best installed with [Homebrew](https://brew.sh/) in a `Terminal` window as follows
+These dependencies are best installed with [Homebrew](https://brew.sh/) in a `Terminal` window as follows. This only needs to be done once on your system.
 
 ```
 # Install HomeBrew (only if you don't have it)
@@ -159,7 +162,19 @@ cd k40_whisperer
 # Update...
 ./update_macOS.sh ../K40_Whisperer-0.29_src
 
-# If all works, commit and push back to GitHub
+# Testing...(needs some work)
+open ./dist/K40\ Whisperer.app
+
+# Fixing...
+
+# Generate new Patch file
+rm macOS.patch
+for i in k40_whisperer.py windowsinhibitor.py
+do
+    diff -Naur ../K40_Whisperer-0.29_src/$i $i >> macOS.patch
+done
+
+# Commit and push back to GitHub
 git commit -a -m"Update to v0.29"
 git push
 git tag v0.29
@@ -213,7 +228,7 @@ A variant of this is included in the patch file.
 
 ## macOS Development Notes
 
-To create a new patch file to be used by `update-macOS.sh`, when needed, which should be rarely:
+To create a new patch file to be used by `update-macOS.sh`, when needed. Q: Should this be done every version update? I think maybe.
 
 ```
 rm macOS.patch
