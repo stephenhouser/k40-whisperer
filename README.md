@@ -35,7 +35,7 @@ You need not read any further in this document. You should be able to run K40 Wh
 
 In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder. See the following sections for details based on your chosen Python version.
 
-If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested *mostly* on `Python 3.7.2` and 'Python 2.7.15` using [pyenv](https://github.com/pyenv/pyenv).
+If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested *mostly* on Python 3.7.2 and Python 2.7.15 using [pyenv](https://github.com/pyenv/pyenv).
 
 NOTE: When installing Python with `pyenv`, you should use the `--enable-framework` flag so that Python can get properly bundled with the application.
 
@@ -112,7 +112,7 @@ NOTE: This gets a similar 'Mach-O' error as 3.7.2. See above. Still seems to wor
 
 If you build K40 Whisperer with the default system Python there are a few complications with compilation that are not (cannot be) addressed directly in the `build_macOS.sh` script and need to be handled manually before compiling. These stem from the _System Integrity Protection_ on macOS (since 10.10) and the system Python packager, `py2app`.
 
-A solution that has worked for my system is documented on Stack Overflow in [py2app Operation Not Permitted][http://stackoverflow.com/questions/33197412/py2app-operation-not-permitted] and there is a detailed discusson on [Apple's Developer Forums][https://forums.developer.apple.com/thread/6987].
+A solution that has worked for my system is documented on Stack Overflow in [py2app Operation Not Permitted](http://stackoverflow.com/questions/33197412/py2app-operation-not-permitted) and there is a detailed discusson on [Apple's Developer Forums](https://forums.developer.apple.com/thread/6987).
 
 Solution:
 * Boot in recovery mode and open a command-line or Terminal
@@ -170,7 +170,7 @@ git push --tags
 
 Button text does not wrap properly on macOS tkinter. My simple solution is to...
 
-* specify a `wraplength` for `Open` and `Reload` 
+* specify a `wraplength` for `Open` and `Reload`
 * shorten the text for `Raster Engrave` and `Vector Engrave` buttons
 
 The following goes in somewhere around line 477 in `k40_whisperer.py`. The `.patch` file has the details.
@@ -191,7 +191,7 @@ w_entry=50
 
 ### Buttons are Blank
 
-macOS Majove has a strange Tkinter problem where button text is blank until you resize the application window with Python 3.7.2. I don't see the same problem with Python 2.7.15. A simple code fix from StackOverflow [button text of tkinter not works in mojave][https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave] is as follows.
+macOS Mojave has a strange Tkinter problem where button text is blank until you resize the application window with Python 3.7.2. I don't see the same problem with Python 2.7.15. A simple code fix from StackOverflow [button text of tkinter not works in mojave](https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave) is as follows.
 This was tested on macOS 10.14.2 with Python 2.7.14 and Python 3.7.2.
 
 ```
@@ -209,51 +209,16 @@ root.after(0, fix)
 tkinter.mainloop()
 ```
 
-This one is not yet in the `.patch` file.
+A variant of this is included in the patch file.
 
 ## macOS Development Notes
 
 To create a new patch file to be used by `update-macOS.sh`, when needed, which should be rarely:
 
 ```
-#    diff -Naur ~/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py k40_whisperer.py >> macOS.patch
 rm macOS.patch
 for i in k40_whisperer.py windowsinhibitor.py
 do
     diff -Naur ~/Downloads/K40_Whisperer-0.29_src/$i $i >> macOS.patch
 done
-```
-
-### Presetting where inkscape is
-
-somewhere around line 658, enable a command line option
-```
-   opts, args = None, None
-        try:
-            opts, args = getopt.getopt(sys.argv[1:], "ho:",["help", "other_option"])
-        except:
-            debug_message('Unable interpret command line options')
-            sys.exit()
-##        for option, value in opts:
-##            if option in ('-h','--help'):
-##                fmessage(' ')
-##                fmessage('Usage: python .py [-g file]')
-##                fmessage('-o    : unknown other option (also --other_option)')
-##                fmessage('-h    : print this help (also --help)\n')
-##                sys.exit()
-##            if option in ('-o','--other_option'):
-##                pass
-```
-
-that will set 
-
-```
-self.inkscape_path.set(newfontdir.encode("utf-8"))
-```
-
-then I can patch it into py2app_setup.py
-
-```
-'argv_emulation': False,
-            'argv_inject': ['--fontdir', '/Library/Fonts', '--defdir', '~/Documents'],
 ```
