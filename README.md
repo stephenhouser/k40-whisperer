@@ -169,7 +169,8 @@ open ./dist/K40\ Whisperer.app
 
 # Generate new Patch file
 rm macOS.patch
-for i in k40_whisperer.py windowsinhibitor.py
+#for i in k40_whisperer.py windowsinhibitor.py
+for i in *.py
 do
     diff -Naur ../K40_Whisperer-0.29_src/$i $i >> macOS.patch
 done

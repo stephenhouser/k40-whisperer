@@ -25,16 +25,14 @@ if [ "$DOWNLOAD" = true ]
 then
 	URL=$1
 	ZIPFILE=$(echo $URL | rev | cut -f1 -d/ | rev)
-	UPDATE_DIR=$(basename $SRC .zip)
-	echo ZIPFILE=$ZIPFILE
-	echo UPDATE_DIR=$UPDATE_DIR
-	curl -qo $ZIPFILE $URL
+	UPDATE_DIR=$(basename $ZIPFILE .zip)
+	curl -so $ZIPFILE $URL
 	unzip -q $ZIPFILE
 
 	rm -rf $UPDATE_DIR
 	rm -rf $ZIPFILE
-	exit 
 fi
+read -p "Press [Enter] key to continue..."
 
 if [ ! -f ${UPDATE_DIR}/k40_whisperer.py ] ; then
 	echo "K40 Whisperer does not exist at \$1 = ${UPDATE_DIR}!"
@@ -71,6 +69,13 @@ patch -p0 -i macOS.patch
 # Update version in setup script
 echo "Update version number in setup script..."
 sed -i.orig "s/app_version = .*/app_version = \"${VERSION}\"/" py2app_setup.py
+
+# Make new patch file
+for i in *.py
+do
+    diff -Naur ../K40_Whisperer-0.29_src/$i $i >> macOS-${VERSION}.patch
+done
+
 
 echo "Convert emblem to .icns..."
 sips -s format icns emblem --out emblem.icns
