@@ -65,7 +65,7 @@ Then running the build should work. If not, well, there should be a lot of error
 ./build_macOS.sh
 ```
 
-NOTE: I get the error below from `py2app` but the application bundle still seems to function properly. Please do let me know if you know how to solve this one. It seems I need to install Python in a deeper path on my system so the `macho` header can be rewritten properly. I haven't tried this yet.
+NOTE: I get the error below from `py2app` but the application bundle still seems to function properly. Please do let me know if you know how to solve this one. It seems I need to install Python in a deeper path on my system so the `macho` header can be rewritten properly. I haven't tried this yet. This is tracked as [Issue #1](https://github.com/stephenhouser/k40-whisperer/issues/1)
 
 ```
 ValueError: New Mach-O header is too large to relocate in ... dist/K40 Whisperer.app/Contents/Resources/lib/python3.7/PIL/.dylibs/liblcms2.2.dylib' (new size=1688, max size=1680, delta=48)
