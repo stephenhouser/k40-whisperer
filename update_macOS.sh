@@ -17,23 +17,73 @@ files="gpl-3.0.txt Change_Log.txt README_Linux.txt README_MacOS.md \
 		py2exe_setup.py requirements.txt  simplepath.py \
 		simplestyle.py simpletransform.py svg_reader.py windowsinhibitor.py"
 
-UPDATE_DIR=$1
+CLEAN_SOURCE=false
+while getopts "hvf:u:d:" OPTION; do
+	case "$OPTION" in
+		h)  echo "Update K40 Whisperer and build macOS Application"
+			echo "update_macOS.sh [-hv]  [-d <dir>] | [-f <zipfile>] | [-u <url>] | [<url>]"
+			echo "	-h Print help (this)"
+			echo "	-v Verbose output"
+			echo "  -c Clean up (delete) new sources (ON when downloading from URL)"
+			echo "	-d <dir> Use existing source directory"
+			echo "	-f <file> Use existing .zip file"
+			echo "	-u <url> Download archive from URL"
+			exit 1
+			;;
+		v) 	VERBOSE=true
+			;;
+		c)  CLEAN_SOURCE=true
+			;;
+		d) 	UPDATE_DIR=${OPTARG}
+			unset SOURCE_ZIP
+			unset URL
+			;;
+		f) 	SOURCE_ZIP=${OPTARG}
+			unset UPDATE_DIR
+			unset URL
+			;;
+		u) 	URL=${OPTARG}
+			unset SOURCE_ZIP
+			unset UPDATE_DIR
+			;;
+		*)  echo "Incorrect option provided $1"
+			exit 1
+			;;
+    esac
+done
 
-# http://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
-DOWNLOAD=true
-if [ "$DOWNLOAD" = true ]
+if [ -z ${URL+x} ] && [ -z ${SOURCE_ZIP+x} ] && [ -z ${UPDATE_DIR+x} ]
 then
 	URL=$1
-	ZIPFILE=$(echo $URL | rev | cut -f1 -d/ | rev)
-	UPDATE_DIR=$(basename $ZIPFILE .zip)
-	curl -so $ZIPFILE $URL
-	unzip -q $ZIPFILE
-
-	rm -rf $UPDATE_DIR
-	rm -rf $ZIPFILE
 fi
-read -p "Press [Enter] key to continue..."
 
+# http://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
+if [ ! -z ${URL+x} ]
+then
+	echo "Download K40 Whisperer source archive..."
+	CLEAN_SOURCE=true
+	SOURCE_ZIP=$(echo $URL | rev | cut -f1 -d/ | rev)
+	curl -o $SOURCE_ZIP $URL
+	if [ ! -f $SOURCE_ZIP ]
+	then
+		echo "Download failed."
+		exit 1
+	fi
+fi
+
+if [ -f "$SOURCE_ZIP" ]
+then
+	echo "Extract K40 Whisperer source files..."
+	unzip -oq $SOURCE_ZIP
+	UPDATE_DIR=$(basename $SOURCE_ZIP .zip)
+	if [ ! -d $UPDATE_DIR ]
+	then
+		echo "Extraction failed."
+		exit 1
+	fi
+fi
+
+# Check that the update directory has K40 in it.
 if [ ! -f ${UPDATE_DIR}/k40_whisperer.py ] ; then
 	echo "K40 Whisperer does not exist at \$1 = ${UPDATE_DIR}!"
 	exit
@@ -70,22 +120,28 @@ patch -p0 -i macOS.patch
 echo "Update version number in setup script..."
 sed -i.orig "s/app_version = .*/app_version = \"${VERSION}\"/" py2app_setup.py
 
-# Make new patch file
-for i in *.py
-do
-    diff -Naur ../K40_Whisperer-0.29_src/$i $i >> macOS-${VERSION}.patch
-done
-
-
 echo "Convert emblem to .icns..."
 sips -s format icns emblem --out emblem.icns
 
 # Build macOS application
 echo "Build macOS Application..."
-./build_macOS.sh
+./build_macOS.sh || exit
+
+# Make new patch file
+echo "Update macOS.patch file..."
+rm macOS-${VERSION}.patch
+for i in $(grep +++ macOS.patch | cut  -f1|cut -d\  -f2)
+do
+    diff -Naur $UPDATE_DIR/$i $i >> macOS-${VERSION}.patch
+done
 
 # Make macOS Disk Image (.dmg) for distribution
 echo "Build macOS Disk Image..."
 rm ./K40-Whisperer-${VERSION}.dmg
 hdiutil create -fs HFS+ -volname K40-Whisperer-${VERSION} -srcfolder ./dist ./K40-Whisperer-${VERSION}.dmg
 
+if [ ! -z ${CLEAN_SOURCE+x} ]
+then
+	echo "🧹 Cleaning up downloaded source files..."
+	rm -rf $SOURCE_ZIP $UPDATE_DIR
+fi
