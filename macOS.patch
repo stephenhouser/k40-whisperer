@@ -1,6 +1,6 @@
---- /Users/houser/Downloads/K40_Whisperer-0.29_src/k40_whisperer.py	2019-01-14 18:37:32.000000000 -0500
-+++ k40_whisperer.py	2019-01-30 15:10:35.000000000 -0500
-@@ -90,9 +90,33 @@
+--- K40_Whisperer-0.30_src/k40_whisperer.py	2019-03-21 23:22:34.000000000 -0400
++++ k40_whisperer.py	2019-04-09 16:38:30.000000000 -0400
+@@ -92,9 +92,33 @@
  
  QUIET = False
  
@@ -36,7 +36,7 @@
  ################################################################################
  class Application(Frame):
      def __init__(self, master):
-@@ -472,7 +496,13 @@
+@@ -492,7 +516,13 @@
          self.gotoY.trace_variable("w", self.Entry_GoToY_Callback)
          
          self.Label_GoToX   = Label(self.master,text="X", anchor=CENTER )
@@ -51,7 +51,7 @@
          ###########################################################################
          # End Left Column #
  
-@@ -3131,6 +3161,7 @@
+@@ -3339,6 +3369,7 @@
                                    U_display))
  
          self.statusbar.configure( bg = 'white' )
@@ -59,7 +59,24 @@
          
      def menu_Mode_Change_Callback(self, varName, index, mode):
          self.menu_View_Refresh()
-@@ -3863,7 +3894,7 @@
+@@ -4128,7 +4159,7 @@
+         xd_label_L = 12
+ 
+         w_label=150
+-        w_entry=40
++        w_entry=100 #40
+         w_units=45
+         xd_entry_L=xd_label_L+w_label+10
+         xd_units_L=xd_entry_L+w_entry+5
+@@ -4270,6 +4301,7 @@
+         self.GEN_Close.place(x=Xbut, y=Ybut, width=130, height=30, anchor="center")
+         self.GEN_Close.bind("<ButtonRelease-1>", self.Close_Current_Window_Click)
+ 
++        macOS_button_fix(gen_settings)
+ 
+     ################################################################################
+     #                          Raster Settings Window                              #
+@@ -4541,7 +4573,7 @@
          xd_label_L = 12
  
          w_label=150
@@ -68,49 +85,27 @@
          w_units=35
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5
-@@ -4005,6 +4036,8 @@
-         self.GEN_Close = Button(gen_settings,text="Close",command=self.Close_Current_Window_Click)
-         self.GEN_Close.place(x=Xbut, y=Ybut, width=130, height=30, anchor="center")
- 
-+        macOS_button_fix(gen_settings)
-+
-     ################################################################################
-     #                          Raster Settings Window                              #
-     ################################################################################
-@@ -4144,6 +4177,7 @@
-         self.bezier_M1_Callback()
-         self.Set_Input_States_RASTER()
- 
-+        macOS_button_fix(raster_settings)
- 
- 
- 
-@@ -4214,8 +4248,10 @@
+@@ -4587,6 +4619,8 @@
              
          self.EGV_Send = Button(egv_send,text="Send EGV Data",command=Close_and_Send_Click)
          self.EGV_Send.place(x=Xbut, y=Ybut, width=130, height=30, anchor="w")
 +
 +        macOS_button_fix(egv_send)
          ################################################################################
--        
-+
          
+         
+@@ -4687,6 +4721,7 @@
+         return 
+ 
+ 
++        macOS_button_fix(raster_settings)
+ 
  ################################################################################
- #             Function for outputting messages to different locations          #
-@@ -4337,4 +4373,6 @@
+ #                          Startup Application                                 #
+@@ -4710,4 +4745,6 @@
      message_box("K40 Whisperer",LOAD_MSG)
  debug_message("Debuging is turned on.")
  
 +macOS_button_fix_enabled = True
 +macOS_button_fix(root)
  root.mainloop()
---- /Users/houser/Downloads/K40_Whisperer-0.29_src/windowsinhibitor.py	2019-01-13 21:58:38.000000000 -0500
-+++ windowsinhibitor.py	2019-01-29 10:51:44.000000000 -0500
-@@ -51,6 +51,6 @@
-     while d_time < 20:
-         time.sleep(5)
-         d_time = time.time()-t_init
--        print d_time
-+        print(d_time)
-     if osSleep:
-         print("stop no sleep = ",osSleep.uninhibit())
