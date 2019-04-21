@@ -95,22 +95,25 @@ VERSION=$(grep "^version " ${UPDATE_DIR}/k40_whisperer.py | grep -Eo "[\.0-9]+")
 
 echo "Updating to version $VERSION"
 
-# Copy f-engrave Python script
-echo "Copy new version of K40 Whisperer..."
-echo "    `basename ${NEW_APP}`"
-cp "${NEW_APP}" "k40_whisperer.py"
-
 # Copy over changed supporting files
-echo "Copy supporting files..."
-for i in $files
+echo "Copy updated files from ${UPDATE_DIR}..."
+for i in ${UPDATE_DIR}/*
 do
-	curd5=`${MD5} "${i}"`
-	newd5=`${MD5} "${UPDATE_DIR}/${i}"`
-	if [ "$curd5" != "$newd5" ]; then
-		echo "    $i"
-		cp "${UPDATE_DIR}/${i}" "$i"
+	fn=`basename ${i}`
+	if [ -f "$fn" ]
+	then
+		curd5=`${MD5} "${fn}"`
+		newd5=`${MD5} "${UPDATE_DIR}/${fn}"`
+		if [ "$curd5" != "$newd5" ]; then
+			echo "*   $fn"
+			cp "${UPDATE_DIR}/${fn}" "$fn"
+		fi
+	else
+		echo "+   $fn"
+		cp "${UPDATE_DIR}/${fn}" "$fn"
 	fi
 done
+
 
 # Apply macOS patches to f-engrave.py
 echo "Patch k40_whisperer.py for macOS..."
