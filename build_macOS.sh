@@ -40,14 +40,18 @@ then
 	#/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 	# Install Dependencies
+	brew cask install xquartz
+	brew cask install inkscape
 	brew install libusb
+
+	# Install python environments...
 	brew install pyenv
 	eval "$(pyenv init -)"
 
 	# Install Python 3.7.2 with pyenv and set it as the default Python
 	PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
 	pyenv global 3.7.2
-	rehash
+	pyenv rehash
 fi
 
 echo "Validate environment..."
@@ -55,10 +59,23 @@ echo "Validate environment..."
 # Get version from main source file.
 VERSION=$(grep "^version " k40_whisperer.py | grep -Eo "[\.0-9]+")
 
+# Determine Python to use... prefer Python3
+PYTHON=$(command -v python3)
+if [ -z "${PYTHON}" ]
+then
+	PYTHON=$(command -v python)
+fi
+
+PIP=$(command -v pip3)
+if [ -z "${PIP}" ]
+then
+	PIP=$(command -v pip)
+fi
+
 # Precheck for 'restricted' permissions on system Python. See below
 # Build will fail if using the system Python and it's restricted
-if [ "$(which python)" == "/usr/bin/python" ]
-	then
+if [ "$(which ${PYTHON})" == "/usr/bin/python" ]
+then
 	if ls -dlO /System/Library/Frameworks/Python.framework | grep 'restricted'> /dev/null
 	then
 		echo -e "\033[1;31m"
@@ -86,25 +103,25 @@ rm -rf ./build ./dist *.pyc ./__pycache__
 
 # Set up and activate virtual environment for dependencies
 echo "Setup Python Virtual Environment..."
-PY_VER=$(python --version 2>&1)
+PY_VER=$(${PYTHON} --version 2>&1)
 if [[ $PY_VER == *"2.7"* ]]
 then
-	pip install virtualenv py2app==0.16
+	${PIP} install virtualenv py2app==0.16
 	virtualenv python_venv
 else
-	python -m venv python_venv
+	${PYTHON} -m venv python_venv
 fi
 
 source ./python_venv/bin/activate
 
 # Install requirements
 echo "Install Dependencies..."
-pip install -r requirements.txt
+${PIP} install -r requirements.txt
 
 echo "Build macOS Application Bundle..."
-python py2app_setup.py py2app --packages=PIL
+${PYTHON} py2app_setup.py py2app --packages=PIL
 
-echo "Copy support files..."
+echo "Copy support files to dist..."
 cp k40_whisperer_test.svg Change_Log.txt gpl-3.0.txt README_MacOS.md dist
 
 # Clean up the build directory when we are done.

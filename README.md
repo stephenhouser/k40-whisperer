@@ -172,6 +172,19 @@ git tag v0.29
 git push --follow-tags
 ```
 
+### Vagrant buildfile
+
+Included is a `vagrant` build setup as well. It's not well tested but seems to mostly work. If nothing else it has the dependency information built into it.
+
+```
+host$ vagrant up                # takes a long time
+host$ vagrant ssh
+vagrant$ cd /vagrant
+vagrant$ ./build_macOS.sh       # run the build on the vagrant guest
+vagrant$ exit
+host$ ls -l dist/*              # the `.app` will show up here.
+```
+
 ### Button Text Doesn't Wrap Properly
 
 Button text does not wrap properly on macOS tkinter. My simple solution is to...
