@@ -37,7 +37,7 @@ done
 if [ "$SETUP_ENVIRONMENT" = true ]
 then
 	# Install HomeBrew (only if you don't have it)
-	#/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 	# Install Dependencies
 	brew cask install xquartz
@@ -45,13 +45,16 @@ then
 	brew install libusb
 
 	# Install python environments...
-	brew install pyenv
-	eval "$(pyenv init -)"
+	# brew install pyenv
+	# eval "$(pyenv init -)"
 
-	# Install Python 3.7.2 with pyenv and set it as the default Python
-	PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
-	pyenv global 3.7.2
-	pyenv rehash
+	# # Install Python 3.7.2 with pyenv and set it as the default Python
+	# PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
+	# pyenv global 3.7.2
+	# pyenv rehash
+
+	brew install python pip
+	pip3 install pyinstaller
 fi
 
 echo "Validate environment..."
