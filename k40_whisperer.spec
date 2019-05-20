@@ -1,6 +1,7 @@
 # -*- mode: python -*-
 #
-# pyinstaller --clean k40_whisperer.spec
+# pyinstaller -y --clean k40_whisperer.spec
+# python -OO -m PyInstaller -y --clean k40_whisperer.spec
 #
 
 block_cipher = None

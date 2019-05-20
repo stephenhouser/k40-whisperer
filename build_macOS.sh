@@ -53,6 +53,7 @@ then
 	# pyenv global 3.7.2
 	# pyenv rehash
 
+	# Installs Python3
 	brew install python pip
 	pip3 install pyinstaller
 fi
@@ -73,31 +74,6 @@ PIP=$(command -v pip3)
 if [ -z "${PIP}" ]
 then
 	PIP=$(command -v pip)
-fi
-
-# Precheck for 'restricted' permissions on system Python. See below
-# Build will fail if using the system Python and it's restricted
-if [ "$(which ${PYTHON})" == "/usr/bin/python" ]
-then
-	if ls -dlO /System/Library/Frameworks/Python.framework | grep 'restricted'> /dev/null
-	then
-		echo -e "\033[1;31m"
-		echo "  *** *** *** *** *** *** *** *** *** *** *** *** ***"
-		echo ""
-		echo "  ️You are using the macOS system Python"
-		echo "  and it has the 'restricted' flag set."
-		echo ""
-		echo "  This causes application packaging to fail."
-		echo "  Please read README.md for details on how to "
-		echo "  resolve this problem."
-		echo ""
-		echo "  A better choice is to use a 'homebrew' installed"
-		echo "  Python. Please see the README.md for more info."
-		echo ""
-		echo "  *** *** *** *** *** *** *** *** *** *** *** *** ***"
-		echo -e "\033[0m"
-		exit 1
-	fi
 fi
 
 # Clean up any previous build work
@@ -122,7 +98,8 @@ echo "Install Dependencies..."
 ${PIP} install -r requirements.txt
 
 echo "Build macOS Application Bundle..."
-${PYTHON} py2app_setup.py py2app --packages=PIL
+${PYTHON} -OO -m PyInstaller -y --clean k40_whisperer.spec
+rm dist/k40_whisperer
 
 echo "Copy support files to dist..."
 cp k40_whisperer_test.svg Change_Log.txt gpl-3.0.txt README_MacOS.md dist
