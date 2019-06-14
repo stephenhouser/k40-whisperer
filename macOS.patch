@@ -1,5 +1,5 @@
---- K40_Whisperer-0.32_src/k40_whisperer.py	2019-04-21 22:00:16.000000000 -0400
-+++ k40_whisperer.py	2019-05-16 14:40:14.000000000 -0400
+--- K40_Whisperer-0.33_src/k40_whisperer.py	2019-06-11 18:18:44.000000000 -0400
++++ k40_whisperer.py	2019-06-14 12:44:13.000000000 -0400
 @@ -93,9 +93,33 @@
  
  QUIET = False
@@ -36,7 +36,7 @@
  ################################################################################
  class Application(Frame):
      def __init__(self, master):
-@@ -493,7 +517,13 @@
+@@ -492,7 +516,13 @@
          self.gotoY.trace_variable("w", self.Entry_GoToY_Callback)
          
          self.Label_GoToX   = Label(self.master,text="X", anchor=CENTER )
@@ -51,7 +51,7 @@
          ###########################################################################
          # End Left Column #
  
-@@ -3361,6 +3391,7 @@
+@@ -3372,6 +3402,7 @@
                                    U_display))
  
          self.statusbar.configure( bg = 'white' )
@@ -59,7 +59,7 @@
          
      def menu_Mode_Change_Callback(self, varName, index, mode):
          self.menu_View_Refresh()
-@@ -4150,7 +4181,7 @@
+@@ -4161,7 +4192,7 @@
          xd_label_L = 12
  
          w_label=150
@@ -68,7 +68,7 @@
          w_units=45
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5
-@@ -4292,6 +4323,7 @@
+@@ -4303,6 +4334,7 @@
          self.GEN_Close.place(x=Xbut, y=Ybut, width=130, height=30, anchor="center")
          self.GEN_Close.bind("<ButtonRelease-1>", self.Close_Current_Window_Click)
  
@@ -76,7 +76,7 @@
  
      ################################################################################
      #                          Raster Settings Window                              #
-@@ -4563,7 +4595,7 @@
+@@ -4574,7 +4606,7 @@
          xd_label_L = 12
  
          w_label=150
@@ -85,7 +85,7 @@
          w_units=35
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5
-@@ -4609,6 +4641,8 @@
+@@ -4620,6 +4652,8 @@
              
          self.EGV_Send = Button(egv_send,text="Send EGV Data",command=Close_and_Send_Click)
          self.EGV_Send.place(x=Xbut, y=Ybut, width=130, height=30, anchor="w")
@@ -94,7 +94,7 @@
          ################################################################################
          
          
-@@ -4709,6 +4743,7 @@
+@@ -4720,6 +4754,7 @@
          return 
  
  
@@ -102,7 +102,7 @@
  
  class pxpiDialog(tkSimpleDialog.Dialog):
          
-@@ -5007,4 +5042,6 @@
+@@ -5018,4 +5053,6 @@
      message_box("K40 Whisperer",LOAD_MSG)
  debug_message("Debuging is turned on.")
  

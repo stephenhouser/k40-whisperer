@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-version = '0.32'
+version = '0.33'
 title_text = "K40 Whisperer V"+version
 
 import sys
@@ -149,8 +149,7 @@ class Application(Frame):
         
     def createWidgets(self):
         self.initComplete = 0
-        self.stop=[]
-        self.stop.append(False)
+        self.stop=[True]
         
         self.k40 = None
         
@@ -461,9 +460,9 @@ class Application(Frame):
         self.Open_Button       = Button(self.master,text="Open\nDesign File",   command=self.menu_File_Open_Design)
         self.Reload_Button     = Button(self.master,text="Reload\nDesign File", command=self.menu_Reload_Design)
         
-        self.Home_Button       = Button(self.master,text="Home",             command=self.Home)
+        self.Home_Button       = Button(self.master,text="Home",            command=self.Home)
         self.UnLock_Button     = Button(self.master,text="Unlock Rail",     command=self.Unlock)
-        self.Stop_Button       = Button(self.master,text="Stop",             command=self.Stop)
+        self.Stop_Button       = Button(self.master,text="Pause/Stop",      command=self.Stop)
 
         try:
             self.left_image  = self.Imaging_Free(Image.open("left.png"),bg=None)
@@ -666,6 +665,7 @@ class Application(Frame):
         top_View.add_separator()
         top_View.add_checkbutton(label = "Show Raster Image"  ,  variable=self.include_Reng ,command= self.menu_View_Refresh)
         if DEBUG:
+            top_View.add("command", label = "Calculate Raster Paths", command = self.menu_Calc_Raster_Paths)
             top_View.add_checkbutton(label = "Show Raster Paths" ,variable=self.include_Rpth ,command= self.menu_View_Refresh)
         top_View.add_checkbutton(label = "Show Vector Engrave",   variable=self.include_Veng ,command= self.menu_View_Refresh)
         top_View.add_checkbutton(label = "Show Vector Cut"    ,   variable=self.include_Vcut ,command= self.menu_View_Refresh)
@@ -1638,8 +1638,8 @@ class Application(Frame):
     def menu_File_Raster_Vector_Cut(self):
         self.menu_File_save_EGV(operation_type="Raster_Eng-Vector_Eng-Vector_Cut")
 
-
     def menu_File_save_EGV(self,operation_type=None,default_name="out.EGV"):
+        self.stop[0]=False
         if DEBUG:
             start=time()
         fileName, fileExtension = os.path.splitext(self.DESIGN_FILE)
@@ -1674,10 +1674,12 @@ class Application(Frame):
             self.EGV_FILE = filename
         if DEBUG:
             print("time = %d seconds" %(int(time()-start)))
+        self.stop[0]=True
         
 
 
     def menu_File_Open_EGV(self):
+        self.stop[0]=False
         init_dir = os.path.dirname(self.DESIGN_FILE)
         if ( not os.path.isdir(init_dir) ):
             init_dir = self.HOME_DIR
@@ -1688,7 +1690,7 @@ class Application(Frame):
             self.resetPath()
             self.DESIGN_FILE = fileselect
             self.EGV_Send_Window(fileselect)
-
+        self.stop[0]=True
             
     def Open_EGV(self,filemname,n_passes=1):
         pass
@@ -1892,8 +1894,8 @@ class Application(Frame):
 ##                    #image_temp = image_temp.filter(UnsharpMask(radius=self.unsharp_r, percent=self.unsharp_p, threshold=self.unsharp_t))
 ##                    filter = ImageFilter.UnsharpMask()
 ##                    filter.radius    = float(self.unsharp_r.get())
-##                    filter.percent   = int(self.unsharp_p.get())
-##                    filter.threshold = int(self.unsharp_t.get())
+##                    filter.percent   = int(float(self.unsharp_p.get()))
+##                    filter.threshold = int(float(self.unsharp_t.get()))
 ##                    image_temp = image_temp.filter(filter)
 
                 if self.negate.get():
@@ -2643,6 +2645,7 @@ class Application(Frame):
             self.statusbar.configure( bg = 'yellow' )
             self.statusMessage.set("No vector data to cut")
         self.set_gui("normal")
+        self.stop[0]=True
         
     def Vector_Eng(self, output_filename=None):
         self.stop[0]=False
@@ -2656,6 +2659,7 @@ class Application(Frame):
             self.statusbar.configure( bg = 'yellow' )
             self.statusMessage.set("No vector data to engrave")
         self.set_gui("normal")
+        self.stop[0]=True
 
     def Raster_Eng(self, output_filename=None):
         self.stop[0]=False
@@ -2687,6 +2691,7 @@ class Application(Frame):
             message_box(msg1, msg2)
             debug_message(traceback.format_exc())
         self.set_gui("normal")
+        self.stop[0]=True
 
     def Raster_Vector_Eng(self, output_filename=None):
         self.stop[0]=False
@@ -2709,6 +2714,7 @@ class Application(Frame):
             message_box(msg1, msg2)
             debug_message(traceback.format_exc())
         self.set_gui("normal")
+        self.stop[0]=True
 
 
     def Vector_Eng_Cut(self, output_filename=None):
@@ -2723,6 +2729,7 @@ class Application(Frame):
             self.statusbar.configure( bg = 'yellow' )
             self.statusMessage.set("No vector data.")
         self.set_gui("normal")
+        self.stop[0]=True
 
         
     def Raster_Vector_Cut(self, output_filename=None):
@@ -2746,6 +2753,7 @@ class Application(Frame):
             message_box(msg1, msg2)
             debug_message(traceback.format_exc())
         self.set_gui("normal")
+        self.stop[0]=True
         
         
     def Gcode_Cut(self, output_filename=None):
@@ -2760,6 +2768,7 @@ class Application(Frame):
             self.statusbar.configure( bg = 'yellow' )
             self.statusMessage.set("No g-code data to cut")
         self.set_gui("normal")
+        self.stop[0]=True
 
 
     ################################################################################
@@ -3153,25 +3162,25 @@ class Application(Frame):
             data=[]
             data.append(ord("I"))
             if Raster_Eng_data!=[]:
-                num_passes = int(self.Reng_passes.get())
+                num_passes = int(float(self.Reng_passes.get()))
                 for k in range(num_passes):
                     if len(data)> 4:
                         data[-4]=ord("@")
                     data.extend(Raster_Eng_data)
             if Vector_Eng_data!=[]:
-                num_passes = int(self.Veng_passes.get())
+                num_passes = int(float(self.Veng_passes.get()))
                 for k in range(num_passes):
                     if len(data)> 4:
                         data[-4]=ord("@")
                     data.extend(Vector_Eng_data)
             if Vector_Cut_data!=[]:
-                num_passes = int(self.Vcut_passes.get())
+                num_passes = int(float(self.Vcut_passes.get()))
                 for k in range(num_passes):
                     if len(data)> 4:
                         data[-4]=ord("@")
                     data.extend(Vector_Cut_data)
             if G_code_Cut_data!=[]:
-                num_passes = int(self.Gcde_passes.get())
+                num_passes = int(float(self.Gcde_passes.get()))
                 for k in range(num_passes):
                     if len(data)> 4:
                         data[-4]=ord("@")
@@ -3207,8 +3216,8 @@ class Application(Frame):
     def send_egv_data(self,data,num_passes=1,output_filename=None):        
         pre_process_CRC        = self.pre_pr_crc.get()
         if self.k40 != None:
-            self.k40.timeout       = int(self.t_timeout.get())   
-            self.k40.n_timeouts    = int(self.n_timeouts.get())
+            self.k40.timeout       = int(float( self.t_timeout.get()  ))   
+            self.k40.n_timeouts    = int(float( self.n_timeouts.get() ))
             if DEBUG:
                 time_start = time()
             self.k40.send_data(data,self.update_gui,self.stop,num_passes,pre_process_CRC, wait_for_laser=True)
@@ -3271,8 +3280,10 @@ class Application(Frame):
                 pass
             
     def Stop(self,event=None):
-        line1 = "The K40 Whisperer is currently Paused."
-        line2 = "Press \"OK\" to stop current action."
+        if self.stop[0]==True:
+            return
+        line1 = "Sending data to the laser from K40 Whisperer is currently Paused."
+        line2 = "Press \"OK\" to abort any jobs currently running."
         line3 = "Press \"Cancel\" to resume."
         if message_ask_ok_cancel("Stop Laser Job.", "%s\n\n%s\n%s" %(line1,line2,line3)):
             self.stop[0]=True
@@ -3292,7 +3303,7 @@ class Application(Frame):
             self.k40=None
         
     def Initialize_Laser(self,event=None):
-        self.stop[0]=False
+        self.stop[0]=True
         self.Release_USB()
         self.k40=None
         self.move_head_window_temporary([0.0,0.0])      
@@ -3409,8 +3420,12 @@ class Application(Frame):
         dummy_event.widget=self.master
         self.Master_Configure(dummy_event,1)
 
-    def menu_View_Recalculate(self):
-        pass
+
+    def menu_Calc_Raster_Paths(self):
+        self.stop[0]=False
+        self.make_raster_coords()
+        self.stop[0]=True
+        self.statusMessage.set(" Done calculating raster paths. ")
 
     def menu_Help_About(self):
         
@@ -3907,8 +3922,8 @@ class Application(Frame):
 ##                            from PIL import ImageFilter
 ##                            filter = ImageFilter.UnsharpMask()
 ##                            filter.radius    = float(self.unsharp_r.get())
-##                            filter.percent   = int(self.unsharp_p.get())
-##                            filter.threshold = int(self.unsharp_t.get())
+##                            filter.percent   = int(float(self.unsharp_p.get()))
+##                            filter.threshold = int(float(self.unsharp_t.get()))
 ##                            plot_im = plot_im.filter(filter)
                         
                         if self.negate.get():
@@ -4000,13 +4015,10 @@ class Application(Frame):
                 XY    = line
                 x1    = (XY[0]-xmin)*scale
                 y1    = (XY[1]-ymax)*scale
-
                 loop  = XY[2]
                 # check and see if we need to move to a new discontinuous start point
                 if (loop == loop_old):
                     self.Plot_Line(xold, yold, x1, y1, x_lft, y_top, XlineShift, YlineShift, self.PlotScale, "red")
-                        
-                    
                 loop_old = loop
                 xold=x1
                 yold=y1
@@ -4034,7 +4046,6 @@ class Application(Frame):
                 loop_old = loop
                 xold=x1
                 yold=y1
-                
 
 
         ######################################            
@@ -4637,7 +4648,7 @@ class Application(Frame):
         def Close_and_Send_Click():
             win_id=self.grab_current()
             win_id.destroy()
-            self.Open_EGV(EGV_filename, n_passes=int(self.n_egv_passes.get()) )
+            self.Open_EGV(EGV_filename, n_passes=int( float(self.n_egv_passes.get()) ))
             
         self.EGV_Send = Button(egv_send,text="Send EGV Data",command=Close_and_Send_Click)
         self.EGV_Send.place(x=Xbut, y=Ybut, width=130, height=30, anchor="w")
