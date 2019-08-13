@@ -109,3 +109,19 @@
 +macOS_button_fix_enabled = True
 +macOS_button_fix(root)
  root.mainloop()
+--- k40-34/nano_library.py	2019-06-11 21:50:06.000000000 -0400
++++ nano_library.py	2019-08-13 13:31:54.000000000 -0400
+@@ -281,10 +281,10 @@
+                 FINISHED = True
+                 break
+             elif response == None:
+-		msg = "Laser stopped responding after operation was complete."
++		        msg = "Laser stopped responding after operation was complete."
+                 update_gui(msg)
+-		#raise Exception(msg)
+-		FINISHED = True
++                #raise Exception(msg)
++                FINISHED = True
+             else: #assume: response == self.OK:
+                 msg = "Waiting for the laser to finish."
+                 update_gui(msg)
