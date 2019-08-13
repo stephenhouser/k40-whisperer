@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-version = '0.33'
+version = '0.34'
 title_text = "K40 Whisperer V"+version
 
 import sys
@@ -93,6 +93,7 @@ except:
 
 QUIET = False
 
+# macOS Patch - Stephen Houser (stephenhouser@gmail.com)
 # macOS Mojave and tikinter buttons are blank
 # https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave]
 # Essentially the fix is to slightly resize the window after it opens.
@@ -119,7 +120,7 @@ def macOS_button_fix(win):
                 win.after(0, make_window_resizer(win))
         except:
             pass
-
+    
 ################################################################################
 class Application(Frame):
     def __init__(self, master):
@@ -516,13 +517,15 @@ class Application(Frame):
         self.gotoY.trace_variable("w", self.Entry_GoToY_Callback)
         
         self.Label_GoToX   = Label(self.master,text="X", anchor=CENTER )
-        self.Label_GoToY = Label(self.master, text="Y", anchor=CENTER)
-        
+        self.Label_GoToY   = Label(self.master,text="Y", anchor=CENTER )
+
+        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
         # Adjust button wrap locations for macOS
         self.Open_Button.config(wraplength=20)
         self.Reload_Button.config(wraplength=20)
         self.Reng_Button.config(text="Raster Eng.")
         self.Veng_Button.config(text="Vector Eng.")
+
         ###########################################################################
         # End Left Column #
 
@@ -3402,8 +3405,10 @@ class Application(Frame):
                                   U_display))
 
         self.statusbar.configure( bg = 'white' )
+
+        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
         macOS_button_fix(root)
-        
+   
     def menu_Mode_Change_Callback(self, varName, index, mode):
         self.menu_View_Refresh()
 
@@ -4192,7 +4197,8 @@ class Application(Frame):
         xd_label_L = 12
 
         w_label=150
-        w_entry=100 #40
+        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
+        w_entry=100
         w_units=45
         xd_entry_L=xd_label_L+w_label+10
         xd_units_L=xd_entry_L+w_entry+5
@@ -4334,7 +4340,9 @@ class Application(Frame):
         self.GEN_Close.place(x=Xbut, y=Ybut, width=130, height=30, anchor="center")
         self.GEN_Close.bind("<ButtonRelease-1>", self.Close_Current_Window_Click)
 
+        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
         macOS_button_fix(gen_settings)
+
 
     ################################################################################
     #                          Raster Settings Window                              #
@@ -4606,6 +4614,7 @@ class Application(Frame):
         xd_label_L = 12
 
         w_label=150
+        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
         w_entry=50
         w_units=35
         xd_entry_L=xd_label_L+w_label+10
@@ -4653,7 +4662,8 @@ class Application(Frame):
         self.EGV_Send = Button(egv_send,text="Send EGV Data",command=Close_and_Send_Click)
         self.EGV_Send.place(x=Xbut, y=Ybut, width=130, height=30, anchor="w")
 
-        macOS_button_fix(egv_send)
+        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
+        macOS_button_fix(gen_settings)
         ################################################################################
         
         
@@ -4751,10 +4761,11 @@ class UnitsDialog(tkSimpleDialog.Dialog):
 
     def apply(self):
         self.result = self.uom.get()
+        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
+        macOS_button_fix(gen_settings)
         return 
 
 
-        macOS_button_fix(raster_settings)
 
 class pxpiDialog(tkSimpleDialog.Dialog):
         
@@ -5053,6 +5064,7 @@ if LOAD_MSG != "":
     message_box("K40 Whisperer",LOAD_MSG)
 debug_message("Debuging is turned on.")
 
+# macOS Patch - Stephen Houser (stephenhouser@gmail.com)
 macOS_button_fix_enabled = True
 macOS_button_fix(root)
 root.mainloop()
