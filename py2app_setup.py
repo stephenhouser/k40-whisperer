@@ -11,7 +11,6 @@ from setuptools import setup
 
 app_name = 'K40 Whisperer'
 app_version = "0.36"
-
 app_copyright = u'Copyright © 2017-2019, Scorch Works, GNU General Public License'
 main_script = 'k40_whisperer.py'
 url = 'https://github.com/stephenhouser/k40-whisperer'
