@@ -9,7 +9,7 @@ VERBOSE=false
 MAKE_DISK=false
 KEEP_VENV=false
 SETUP_ENVIRONMENT=false
-while getopts "hvde" OPTION; do
+while getopts "hvdes" OPTION; do
 	case "$OPTION" in
 		h)  echo "Options:"
 			echo "\t-h Print help (this)"
