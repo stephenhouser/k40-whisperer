@@ -1,5 +1,5 @@
---- K40_Whisperer-0.38_src/k40_whisperer.py	2019-11-10 08:47:50.000000000 -0500
-+++ k40_whisperer.py	2019-11-24 13:48:18.000000000 -0500
+--- K40_Whisperer-0.41_src/k40_whisperer.py	2019-12-06 19:54:12.000000000 -0500
++++ k40_whisperer.py	2019-12-09 18:54:44.000000000 -0500
 @@ -102,7 +102,35 @@
      PYCLIPPER = False
   
@@ -52,7 +52,7 @@
          ###########################################################################
          # End Left Column #
  
-@@ -3737,7 +3773,10 @@
+@@ -3742,7 +3778,10 @@
                                    U_display))
  
          self.statusbar.configure( bg = 'white' )
@@ -64,7 +64,7 @@
      def menu_Inside_First_Callback(self, varName, index, mode):
          if self.GcodeData.ecoords != []:
              if self.VcutData.sorted == True:
-@@ -4641,7 +4680,8 @@
+@@ -4646,7 +4685,8 @@
          xd_label_L = 12
  
          w_label=150
@@ -74,7 +74,7 @@
          w_units=45
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5
-@@ -4871,6 +4911,9 @@
+@@ -4876,6 +4916,9 @@
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5
  
@@ -84,7 +84,7 @@
  
  
          D_Yloc=D_Yloc+D_dY
-@@ -5195,7 +5238,8 @@
+@@ -5200,7 +5243,8 @@
          xd_label_L = 12
  
          w_label=150
@@ -94,7 +94,7 @@
          w_units=35
          xd_entry_L=xd_label_L+w_label+10
          xd_units_L=xd_entry_L+w_entry+5
-@@ -5241,6 +5285,9 @@
+@@ -5246,6 +5290,9 @@
              
          self.EGV_Send = Button(egv_send,text="Send EGV Data",command=Close_and_Send_Click)
          self.EGV_Send.place(x=Xbut, y=Ybut, width=130, height=30, anchor="w")
@@ -104,7 +104,7 @@
          ################################################################################
          
          
-@@ -5338,6 +5385,8 @@
+@@ -5343,6 +5390,8 @@
  
      def apply(self):
          self.result = self.uom.get()
@@ -113,7 +113,7 @@
          return 
  
  
-@@ -5665,4 +5714,7 @@
+@@ -5670,4 +5719,7 @@
          app.master.geometry("480x320")
  
  

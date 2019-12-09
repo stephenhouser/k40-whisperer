@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-version = '0.38'
+version = '0.41'
 title_text = "K40 Whisperer V"+version
 
 import sys
@@ -1941,6 +1941,8 @@ class Application(Frame):
         self.input_dpi = 1000
         svg_reader.image_dpi = self.input_dpi
         svg_reader.timout = int(float( self.ink_timeout.get())*60.0) 
+        dialog_pxpi    = None
+        dialog_viewbox = None
         try:
             try:
                 try:
@@ -1958,9 +1960,9 @@ class Application(Frame):
                     if pxpi_dialog.result == None:
                         return
                     
-                    pxpi,viewbox = pxpi_dialog.result
+                    dialog_pxpi,dialog_viewbox = pxpi_dialog.result
                     svg_reader.parse_svg(self.SVG_FILE)
-                    svg_reader.set_size(pxpi,viewbox)
+                    svg_reader.set_size(dialog_pxpi,dialog_viewbox)
                     svg_reader.make_paths()
                     
             except SVG_TEXT_EXCEPTION as e:
@@ -1969,6 +1971,8 @@ class Application(Frame):
                 self.statusMessage.set("Converting TEXT to PATHS.")
                 self.master.update()
                 svg_reader.parse_svg(self.SVG_FILE)
+                if dialog_pxpi != None and dialog_viewbox != None:
+                    svg_reader.set_size(dialog_pxpi,dialog_viewbox)
                 svg_reader.make_paths(txt2paths=True)
                 
         except Exception as e:
@@ -2821,7 +2825,7 @@ class Application(Frame):
         try:
             self.menuBar.entryconfigure("File"    , state=new_state)
             self.menuBar.entryconfigure("View"    , state=new_state)
-            self.menuBar.entryconfigure("USB"     , state=new_state)
+            self.menuBar.entryconfigure("Tools"     , state=new_state)
             self.menuBar.entryconfigure("Settings", state=new_state)
             self.menuBar.entryconfigure("Help"    , state=new_state)
             self.PreviewCanvas.configure(state=new_state)
@@ -2835,7 +2839,8 @@ class Application(Frame):
             self.statusbar.configure(state="normal")
             self.master.update()
         except:
-            pass
+            if DEBUG:
+                debug_message(traceback.format_exc())
 
     def Vector_Cut(self, output_filename=None):
         self.stop[0]=False
