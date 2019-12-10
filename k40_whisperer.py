@@ -2825,7 +2825,11 @@ class Application(Frame):
         try:
             self.menuBar.entryconfigure("File"    , state=new_state)
             self.menuBar.entryconfigure("View"    , state=new_state)
+<<<<<<< HEAD
             self.menuBar.entryconfigure("Tools"     , state=new_state)
+=======
+            self.menuBar.entryconfigure("USB"     , state=new_state)
+>>>>>>> 0e9700ce3cb5875556822bb118cc306284659aa7
             self.menuBar.entryconfigure("Settings", state=new_state)
             self.menuBar.entryconfigure("Help"    , state=new_state)
             self.PreviewCanvas.configure(state=new_state)
@@ -2839,8 +2843,12 @@ class Application(Frame):
             self.statusbar.configure(state="normal")
             self.master.update()
         except:
+<<<<<<< HEAD
             if DEBUG:
                 debug_message(traceback.format_exc())
+=======
+            pass
+>>>>>>> 0e9700ce3cb5875556822bb118cc306284659aa7
 
     def Vector_Cut(self, output_filename=None):
         self.stop[0]=False
@@ -3032,7 +3040,10 @@ class Application(Frame):
                 msg2=msg2+'\n\nBatch File Errors:\n'+stderr
             self.run_time = 0
             message_box(msg1, msg2)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0e9700ce3cb5875556822bb118cc306284659aa7
 
     def make_trace_path(self):
         my_hull = hull2D()
@@ -3088,6 +3099,63 @@ class Application(Frame):
             trace_coords = self.offset_eccords(trace_coords,gap)
         return trace_coords
 
+<<<<<<< HEAD
+=======
+    def make_trace_path(self):
+        my_hull = hull2D()
+        if self.inputCSYS.get() and self.RengData.image == None:
+            xmin,xmax,ymin,ymax = 0.0,0.0,0.0,0.0
+        else:
+            xmin,xmax,ymin,ymax = self.Get_Design_Bounds()
+            
+        startx = xmin
+        starty = ymax
+
+        #######################################
+        Vcut_coords = self.VcutData.ecoords
+        Veng_coords = self.VengData.ecoords
+        Gcode_coords= self.GcodeData.ecoords
+        if self.mirror.get() or self.rotate.get():
+            Vcut_coords = self.mirror_rotate_vector_coords(Vcut_coords)
+            Veng_coords = self.mirror_rotate_vector_coords(Veng_coords)
+            Gcode_coords= self.mirror_rotate_vector_coords(Gcode_coords)
+
+        Vcut_coords,startx,starty = self.scale_vector_coords(Vcut_coords,startx,starty)
+        Veng_coords,startx,starty = self.scale_vector_coords(Veng_coords,startx,starty)
+        Gcode_coords,startx,starty= self.scale_vector_coords(Gcode_coords,startx,starty)
+        #######################################
+        if self.RengData.ecoords==[]:
+            if self.stop[0] == True:
+                self.stop[0]=False
+                self.make_raster_coords()
+                self.stop[0]=True
+            else:
+                self.make_raster_coords()
+
+        RengHullCoords = []
+        Xscale = 1/float(self.LaserXscale.get())
+        Yscale = 1/float(self.LaserYscale.get())
+        if self.rotary.get():
+            Rscale = 1/float(self.LaserRscale.get())
+            Yscale = Yscale*Rscale
+            
+        for point in self.RengData.hull_coords:
+            RengHullCoords.append([point[0]*Xscale+xmin, point[1]*Yscale, point[2]])
+            
+        all_coords = []
+        all_coords.extend(Vcut_coords)
+        all_coords.extend(Veng_coords)
+        all_coords.extend(Gcode_coords)
+        all_coords.extend(RengHullCoords)
+
+        trace_coords=[]
+        if all_coords != []:
+            trace_coords = my_hull.convexHullecoords(all_coords)
+            gap = float(self.trace_gap.get())/self.units_scale
+            trace_coords = self.offset_eccords(trace_coords,gap)
+        return trace_coords
+
+>>>>>>> 0e9700ce3cb5875556822bb118cc306284659aa7
             
     ################################################################################
     def Sort_Paths(self,ecoords,i_loop=2):
@@ -3456,6 +3524,28 @@ class Application(Frame):
                                                 Rapid_Feed_Rate = Rapid_Feed,     \
                                                 use_laser=laser_on
                                                 )
+
+
+            if (operation_type.find("Trace_Eng") > -1) and (self.trace_coords!=[]):
+                Feed_Rate = float(self.trace_speed.get())*feed_factor
+                laser_on = self.trace_w_laser.get()
+                self.statusMessage.set("Generating EGV data...")
+                self.master.update()
+                Trace_Eng_egv_inst = egv(target=lambda s:Trace_Eng_data.append(s))
+                Trace_Eng_egv_inst.make_egv_data(
+                                                self.trace_coords,                \
+                                                startX=startx,                    \
+                                                startY=starty,                    \
+                                                Feed = Feed_Rate,                 \
+                                                board_name=self.board_name.get(), \
+                                                Raster_step = 0,                  \
+                                                update_gui=self.update_gui,       \
+                                                stop_calc=self.stop,              \
+                                                FlipXoffset=FlipXoffset,          \
+                                                Rapid_Feed_Rate = Rapid_Feed,     \
+                                                use_laser=laser_on
+                                                )
+                
                 
                 
             if (operation_type.find("Raster_Eng") > -1) and  (self.RengData.ecoords!=[]):
