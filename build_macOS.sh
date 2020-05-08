@@ -156,9 +156,9 @@ then
 
 	if [ "$PYINSTALLER" = true ]
 	then
-		VOLNAME=K40-Whisperer-${VERSION}-pyinstaller
-	else 
 		VOLNAME=K40-Whisperer-${VERSION}
+	else 
+		VOLNAME=K40-Whisperer-${VERSION}-pysetup
 	fi
 
 	rm ${VOLNAME}.dmg

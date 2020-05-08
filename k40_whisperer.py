@@ -2,7 +2,7 @@
 """
     K40 Whisperer
 
-    Copyright (C) <2017-2019>  <Scorch>
+    Copyright (C) <2017-2020>  <Scorch>
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-version = '0.42'
+version = '0.49'
 title_text = "K40 Whisperer V"+version
 
 import sys
@@ -100,7 +100,12 @@ try:
 except:
     print("Unable to load Pyclipper library (Offset trace outline will not work without it)")
     PYCLIPPER = False
- 
+
+try:
+    os.chdir(os.path.dirname(__file__))
+except:
+    pass
+
 QUIET = False
 
 # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
@@ -1761,11 +1766,21 @@ class Application(Frame):
         if ( not os.path.isdir(init_dir) ):
             init_dir = self.HOME_DIR
 
-        fileselect = askopenfilename(filetypes=[("Design Files", ("*.svg","*.dxf")),
-                                            ("G-Code Files", ("*.ngc","*.gcode","*.g","*.tap")),\
-                                            ("DXF Files","*.dxf"),\
-                                            ("SVG Files","*.svg"),\
-                                            ("All Files","*"),\
+        design_types = ("Design Files", ("*.svg","*.dxf"))
+        gcode_types  = ("G-Code Files", ("*.ngc","*.gcode","*.g","*.tap"))
+        
+        Name, fileExtension = os.path.splitext(self.DESIGN_FILE)
+        TYPE=fileExtension.upper()
+        if TYPE != '.DXF' and TYPE!='.SVG' and TYPE!='.EGV':
+            default_types = gcode_types
+        else:
+            default_types = design_types
+        
+        fileselect = askopenfilename(filetypes=[default_types,
+                                            ("G-Code Files ", ("*.ngc","*.gcode","*.g","*.tap")),\
+                                            ("DXF Files ","*.dxf"),\
+                                            ("SVG Files ","*.svg"),\
+                                            ("All Files ","*"),\
                                             ("Design Files ", ("*.svg","*.dxf"))],\
                                             initialdir=init_dir)
 
@@ -1848,7 +1863,6 @@ class Application(Frame):
 
 
     def menu_File_Open_EGV(self):
-        self.stop[0]=False
         init_dir = os.path.dirname(self.DESIGN_FILE)
         if ( not os.path.isdir(init_dir) ):
             init_dir = self.HOME_DIR
@@ -1859,11 +1873,9 @@ class Application(Frame):
             self.resetPath()
             self.DESIGN_FILE = fileselect
             self.EGV_Send_Window(fileselect)
-        self.stop[0]=True
-        #self.Finish_Job()
         
     def Open_EGV(self,filemname,n_passes=1):
-        pass
+        self.stop[0]=False
         EGV_data=[]
         value1 = ""
         value2 = ""
@@ -1945,6 +1957,7 @@ class Application(Frame):
         dxmils = -(x_end_mils - x_start_mils)
         dymils =   y_end_mils - y_start_mils
         self.Send_Rapid_Move(dxmils,dxmils)
+        self.stop[0]=True
 
         
     def Open_SVG(self,filemname):
@@ -2279,6 +2292,46 @@ class Application(Frame):
 
     #######################################################################
 
+    def gcode_error_message(self,message):
+        error_report = Toplevel(width=525,height=60)
+        error_report.title("G-Code Reading Errors/Warnings")
+        error_report.iconname("G-Code Errors")
+        error_report.grab_set()
+        return_value =  StringVar()
+        return_value.set("none")
+
+        try:
+            error_report.iconbitmap(bitmap="@emblem64")
+        except:
+            debug_message(traceback.format_exc())
+            pass
+
+        def Close_Click(event):
+            return_value.set("close")
+            error_report.destroy()
+            
+        #Text Box
+        Error_Frame = Frame(error_report)
+        scrollbar = Scrollbar(Error_Frame, orient=VERTICAL)
+        Error_Text = Text(Error_Frame, width="80", height="20",yscrollcommand=scrollbar.set,bg='white')
+        for line in message:
+            Error_Text.insert(END,line+"\n")
+        scrollbar.config(command=Error_Text.yview)
+        scrollbar.pack(side=RIGHT,fill=Y)
+        #End Text Box
+
+        Button_Frame = Frame(error_report)
+        close_button = Button(Button_Frame,text=" Close ")
+        close_button.bind("<ButtonRelease-1>", Close_Click)
+        close_button.pack(side=RIGHT,fill=X)
+        
+        Error_Text.pack(side=LEFT,fill=BOTH,expand=1)
+        Button_Frame.pack(side=BOTTOM)
+        Error_Frame.pack(side=LEFT,fill=BOTH,expand=1)
+        
+        root.wait_window(error_report)
+        return return_value.get()
+
     def Open_G_Code(self,filename):
         self.resetPath()
         
@@ -2287,9 +2340,8 @@ class Application(Frame):
             MSG = g_rip.Read_G_Code(filename, XYarc2line = True, arc_angle=2, units="in", Accuracy="")
             Error_Text = ""
             if MSG!=[]:
-                for line in MSG:
-                    Error_Text = Error_Text + line + "\n"
-                    message_box("G-Code Messages", Error_Text)
+                self.gcode_error_message(MSG)
+
         #except StandardError as e:
         except Exception as e:
             msg1 = "G-Code Load Failed:  "
@@ -3319,7 +3371,12 @@ class Application(Frame):
         for i in range(len(coords)):
             coords_rotate_mirror.append(coords[i][:])
             if self.mirror.get():
-                coords_rotate_mirror[i][0]=xmin+xmax-coords_rotate_mirror[i][0]
+                if self.inputCSYS.get() and self.RengData.image == None:
+                    coords_rotate_mirror[i][0]=-coords_rotate_mirror[i][0]
+                else:
+                    coords_rotate_mirror[i][0]=xmin+xmax-coords_rotate_mirror[i][0]
+                
+                
             if self.rotate.get():
                 x = coords_rotate_mirror[i][0]
                 y = coords_rotate_mirror[i][1]
@@ -3691,8 +3748,14 @@ class Application(Frame):
         line1 = "Sending data to the laser from K40 Whisperer is currently Paused."
         line2 = "Press \"OK\" to abort any jobs currently running."
         line3 = "Press \"Cancel\" to resume."
+        if self.k40 != None:
+            self.k40.pause_un_pause()
+            
         if message_ask_ok_cancel("Stop Laser Job.", "%s\n\n%s\n%s" %(line1,line2,line3)):
             self.stop[0]=True
+        else:
+            if self.k40 != None:
+                self.k40.pause_un_pause()
 
     def Hide_Advanced(self,event=None):
         self.advanced.set(0)
@@ -5634,13 +5697,13 @@ class pxpiDialog(tkSimpleDialog.Dialog):
         Title_Text0 = Label(master, text=t0+t1+t2, anchor=W)
         Title_Text1 = Label(master, text=t3, anchor=W)
         
-        Radio_SVG_pxpi_96   = Radiobutton(master,text=" 96 px/in", value="96")
+        Radio_SVG_pxpi_96   = Radiobutton(master,text=" 96 units/in", value="96")
         Label_SVG_pxpi_96   = Label(master,text="(File saved with Inkscape v0.92 or newer)", anchor=W)
         
-        Radio_SVG_pxpi_90   = Radiobutton(master,text=" 90 px/in", value="90")
+        Radio_SVG_pxpi_90   = Radiobutton(master,text=" 90 units/in", value="90")
         Label_SVG_pxpi_90   = Label(master,text="(File saved with Inkscape v0.91 or older)", anchor=W)
         
-        Radio_SVG_pxpi_72   = Radiobutton(master,text=" 72 px/in", value="72")
+        Radio_SVG_pxpi_72   = Radiobutton(master,text=" 72 units/in", value="72")
         Label_SVG_pxpi_72   = Label(master,text="(File saved with Adobe Illustrator)", anchor=W)
 
         Radio_Res_Custom = Radiobutton(master,text=" Custom:", value="custom")
@@ -5649,7 +5712,7 @@ class pxpiDialog(tkSimpleDialog.Dialog):
 
         Entry_Custom_pxpi   = Entry(master,width="10")
         Entry_Custom_pxpi.configure(textvariable=self.other)
-        Label_pxpi_units =  Label(master,text="px/in", anchor=W)
+        Label_pxpi_units =  Label(master,text="units/in", anchor=W)
         self.trace_id_pxpi = self.other.trace_variable("w", Entry_custom_Callback)
 
         Label_Width =  Label(master,text="Width", anchor=W)
