@@ -122,6 +122,7 @@ patch -p0 -i macOS.patch
 # Update version in setup script
 echo "Update version number in setup script..."
 sed -i.orig "s/app_version = .*/app_version = \"${VERSION}\"/" py2app_setup.py
+sed -i.orig "s/'CFBundleShortVersionString': '.*'/'CFBundleShortVersionString': \'${VERSION}\'/" k40_whisperer.spec				
 
 echo "Convert emblem to .icns..."
 sips -s format icns emblem --out emblem.icns
