@@ -36,15 +36,17 @@ You need not read any further in this document. You should be able to run K40 Wh
 
 ## Rebuilding from Source (macOS)
 
+*** These directions may be outdated, please check the `build_macOS.sh` script for the current details.***
+
 In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder. See the following sections for details based on your chosen Python version.
 
 If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested *mostly* on Python 3.7.2 and Python 2.7.15 using [pyenv](https://github.com/pyenv/pyenv).
 
 NOTE: When installing Python with `pyenv`, you should use the `--enable-framework` flag so that Python can get properly bundled with the application.
 
-### Python 3.7.2 (preferred method)
+### Python 3.9.1 (preferred method)
 
-Set up Python 3.7.2 with HomeBrew and pyenv. Something like the following should work
+Set up Python 3.9.1 with HomeBrew and pyenv. Something like the following should work
 
 ```
 # Install HomeBrew (only if you don't have it)
@@ -56,10 +58,10 @@ brew cask install xquartz
 brew cask install inkscape
 brew install pyenv
 
-# Install Python 3.7.2 with pyenv and set it as the default Python
+# Install Python 3.9.1 with pyenv and set it as the default Python
 PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
 pyenv global 3.7.2
-rehash
+pyenv rehash
 ```
 
 Then running the build should work. If not, well, there should be a lot of error messages to help you track things down.
@@ -68,15 +70,9 @@ Then running the build should work. If not, well, there should be a lot of error
 ./build_macOS.sh
 ```
 
-NOTE: I get the error below from `py2app` but the application bundle still seems to function properly. Please do let me know if you know how to solve this one. It seems I need to install Python in a deeper path on my system so the `macho` header can be rewritten properly. I haven't tried this yet. This is tracked as [Issue #1](https://github.com/stephenhouser/k40-whisperer/issues/1)
-
-```
-ValueError: New Mach-O header is too large to relocate in ... dist/K40 Whisperer.app/Contents/Resources/lib/python3.7/PIL/.dylibs/liblcms2.2.dylib' (new size=1688, max size=1680, delta=48)
-```
-
 ### Python 3.6
 
-Don't.
+Don't do it.
 
 Compiling with `py2app-0.18` under Homebrew Python 3.6.6 results in:
 
@@ -86,32 +82,11 @@ ValueError: character U+6573552f is not in range [U+0000; U+10ffff]
 
 ### Python 2.7.15 (not preferred)
 
-Set up Python 2.7.15 with HomeBrew and pyenv. Something like the following should work
-
-```
-# Install HomeBrew (only if you don't have it)
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-# Install Dependencies (only if you haven't done this already)
-brew install libusb
-brew cask install inkscape
-brew install pyenv
-
-# Install Python 2.7.15 with pyenv and set it as the default Python
-PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 2.7.15
-pyenv global 2.7.15
-rehash
-```
-
-Then running the build should work. If not, well, there should be a lot of error messages to help you track things down.
-
-```
-./build_macOS.sh
-```
-
-NOTE: This gets a similar 'Mach-O' error as 3.7.2. See above. Still seems to work. Less tested than the Python 3.7 versions.
+Don't do it. Python 2 is dead.
 
 ### macOS System Python (not preferred)
+
+Don't do it.
 
 If you build K40 Whisperer with the default system Python there are a few complications with compilation that are not (cannot be) addressed directly in the `build_macOS.sh` script and need to be handled manually before compiling. These stem from the _System Integrity Protection_ on macOS (since 10.10) and the system Python packager, `py2app`.
 
@@ -156,7 +131,7 @@ git clone https://github.com/stephenhouser/k40_whisperer.git
 cd k40_whisperer
 
 # Download, apply patches, build the application
-./update_macOS.sh https://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
+./update_macOS.sh -u https://www.scorchworks.com/K40whisperer/K40_Whisperer-0.29_src.zip
 
 # Test/Fix/Test...(needs some work)
 ...
@@ -187,6 +162,8 @@ host$ ls -l dist/*              # the `.app` will show up here.
 
 ### Button Text Doesn't Wrap Properly
 
+NOTE: This seems to be resolved in Python 3.9.1 and/or newer Tk. No longer needed.
+
 Button text does not wrap properly on macOS tkinter. My simple solution is to...
 
 * specify a `wraplength` for `Open` and `Reload`
@@ -209,6 +186,8 @@ w_entry=50
 ```
 
 ### Buttons are Blank
+
+NOTE: This seems to be resolved in Python 3.9.1 and/or newer Tk. No longer needed.
 
 macOS Mojave has a strange Tkinter problem where button text is blank until you resize the application window with Python 3.7.2. I don't see the same problem with Python 2.7.15. A simple code fix from StackOverflow [button text of tkinter not works in mojave](https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave) is as follows.
 This was tested on macOS 10.14.2 with Python 2.7.14 and Python 3.7.2.
