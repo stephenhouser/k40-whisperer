@@ -107,35 +107,7 @@ except:
     pass
 
 QUIET = False
-
-# macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-# macOS Mojave and tikinter buttons are blank
-# https://stackoverflow.com/questions/52529403/button-text-of-tkinter-not-works-in-mojave]
-# Essentially the fix is to slightly resize the window after it opens.
-macOS_button_fix_enabled = False
-
-def macOS_button_fix(win):
-    def make_window_resizer(w):
-        def window_resizer():
-            a = w.winfo_geometry().split('+')[0]
-            (width, height) = a.split('x')
-            w.geometry('%dx%d' % (int(width)+1, int(height)+1))
-
-        return window_resizer
-
-    # The fix causes a bit of flicker on startup, so only run it for macOS >= 10.14
-    # Check for macOS >= 10.14
-    if macOS_button_fix_enabled:
-        try:
-            import platform
-            v, _, _ = platform.mac_ver()
-            v = float('.'.join(v.split('.')[:2]))
-            if v >= 10.14:
-                win.update()
-                win.after(0, make_window_resizer(win))
-        except:
-            pass
- 
+   
 ################################################################################
 class Application(Frame):
     def __init__(self, master):
@@ -601,14 +573,6 @@ class Application(Frame):
         
         self.Label_GoToX   = Label(self.master,text="X", anchor=CENTER )
         self.Label_GoToY   = Label(self.master,text="Y", anchor=CENTER )
-
-        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-        # Adjust button wrap locations for macOS
-        self.Open_Button.config(wraplength=20)
-        self.Reload_Button.config(wraplength=20)
-        self.Reng_Button.config(text="Raster Eng.")
-        self.Veng_Button.config(text="Vector Eng.")
-
         ###########################################################################
         # End Left Column #
 
@@ -3867,10 +3831,7 @@ class Application(Frame):
                                   U_display))
 
         self.statusbar.configure( bg = 'white' )
-
-        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-        macOS_button_fix(root)
-         
+        
     def menu_Inside_First_Callback(self, varName, index, mode):
         if self.GcodeData.ecoords != []:
             if self.VcutData.sorted == True:
@@ -4789,8 +4750,7 @@ class Application(Frame):
         xd_label_L = 12
 
         w_label=150
-        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-        w_entry=100
+        w_entry=40
         w_units=45
         xd_entry_L=xd_label_L+w_label+10
         xd_units_L=xd_entry_L+w_entry+5
@@ -5019,9 +4979,6 @@ class Application(Frame):
         w_units=35
         xd_entry_L=xd_label_L+w_label+10
         xd_units_L=xd_entry_L+w_entry+5
-
-        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-        macOS_button_fix(gen_settings)
 
 
 
@@ -5349,8 +5306,7 @@ class Application(Frame):
         xd_label_L = 12
 
         w_label=150
-        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-        w_entry=50
+        w_entry=40
         w_units=35
         xd_entry_L=xd_label_L+w_label+10
         xd_units_L=xd_entry_L+w_entry+5
@@ -5396,9 +5352,6 @@ class Application(Frame):
             
         self.EGV_Send = Button(egv_send,text="Send EGV Data",command=Close_and_Send_Click)
         self.EGV_Send.place(x=Xbut, y=Ybut, width=130, height=30, anchor="w")
-
-        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-        macOS_button_fix(gen_settings)
         ################################################################################
         
         
@@ -5496,8 +5449,6 @@ class UnitsDialog(tkSimpleDialog.Dialog):
 
     def apply(self):
         self.result = self.uom.get()
-        # macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-        macOS_button_fix(gen_settings)
         return 
 
 
@@ -5793,10 +5744,10 @@ app.master.geometry("800x560")
 try:
     try:
         import tkFont
-        default_font = tkFont.nametofont("TkDefaultFont")
+        default_font = tkFont.nametofont("systemSystemFont")
     except:
         import tkinter.font
-        default_font = tkinter.font.nametofont("TkDefaultFont")
+        default_font = tkinter.font.nametofont("systemSystemFont")
 
     default_font.configure(size=9)
     default_font.configure(family='arial')
@@ -5839,7 +5790,4 @@ for option, value in opts:
         app.master.geometry("480x320")
 
 
-# macOS Patch - Stephen Houser (stephenhouser@gmail.com)
-macOS_button_fix_enabled = True
-macOS_button_fix(root)
 root.mainloop()

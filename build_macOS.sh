@@ -53,8 +53,8 @@ then
 	eval "$(pyenv init -)"
 
 	# Install Python 3.7.2 with pyenv and set it as the default Python
-	PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.7.2
-	pyenv global 3.7.2
+	PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.9.1
+	pyenv global 3.9.1
 	pyenv rehash
 fi
 
