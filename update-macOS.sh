@@ -129,7 +129,7 @@ sips -s format icns emblem --out emblem.icns
 
 # Build macOS application
 echo "Build macOS Application..."
-./build_macOS.sh -d || exit
+./build-macOS.sh -d || exit
 
 # Make new patch file
 echo "Update macOS.patch file..."

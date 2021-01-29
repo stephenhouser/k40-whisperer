@@ -40,8 +40,8 @@ You need not read any further in this document. You should be able to run K40 Wh
 
 This fork adds the following files to Scorch's work
 
-* `build_macOS.sh` -- bash build script to build and create application bundle.
-* `update_macOS.sh` -- bash script to patch a new version of K40 Whisperer and bundle it.
+* `build-macOS.sh` -- bash build script to build and create application bundle.
+* `update-macOS.sh` -- bash script to patch a new version of K40 Whisperer and bundle it.
 * `k40_whisperer.spec` -- application specification for PyInstaller.
 * `emblem.icns` -- Icons for macOS application bundle (made with `sips`)
 * `macOS.patch` -- tweaks to Scorch's source for macOS
@@ -80,9 +80,9 @@ git push --follow-tags
 
 ## macOS Build/Update Process Details
 
-*** These directions may be outdated, please check the `build_macOS.sh` script for the current details.***
+*** These directions may be outdated, please check the `build-macOS.sh` script for the current details.***
 
-In the main directory run `build_macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder. See the following sections for details based on your chosen Python version.
+In the main directory run `build-macOS.sh`. This will create a clickable macOS Application in the `./dist` directory named `K40 Whisperer.app` that can then be distributed or moved to your Applications folder. See the following sections for details based on your chosen Python version.
 
 If you are using one of the most excellent [Homebrew](https://brew.sh/) versions of Python, you are not only a wonderful person, but life will be easy for you. This build process has been tested *mostly* on Python 3.7.2 and Python 2.7.15 using [pyenv](https://github.com/pyenv/pyenv).
 
@@ -111,7 +111,7 @@ pyenv rehash
 Then running the build should work. If not, well, there should be a lot of error messages to help you track things down.
 
 ```
-./build_macOS.sh
+./build-macOS.sh
 ```
 
 ### Vagrant buildfile
@@ -122,7 +122,7 @@ Included is a `vagrant` build setup as well. It's not well tested but seems to m
 host$ vagrant up                # takes a long time
 host$ vagrant ssh
 vagrant$ cd /vagrant
-vagrant$ ./build_macOS.sh       # run the build on the vagrant guest
+vagrant$ ./build-macOS.sh       # run the build on the vagrant guest
 vagrant$ exit
 host$ ls -l dist/*              # the `.app` will show up here.
 ```
