@@ -73,8 +73,7 @@ then
 	eval "$(pyenv init -)"
 
 	# Install Python with pyenv and set it as the default Python
-	#PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install ${PYENV_PYTHON_VERSION}
-	pyenv install ${PYENV_PYTHON_VERSION}
+	PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install ${PYENV_PYTHON_VERSION}
 	check_failure "Failed to install Python ${PYENV_PYTHON_VERSION}"
 fi
 
