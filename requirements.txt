@@ -2,4 +2,3 @@ lxml
 pyusb
 pillow
 pyclipper
-pyinstaller

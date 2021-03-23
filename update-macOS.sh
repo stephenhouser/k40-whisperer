@@ -118,6 +118,9 @@ done
 # Apply macOS patches to f-engrave.py
 echo "Patch k40_whisperer.py for macOS..."
 patch -p0 -i macOS.patch
+echo >> requirements.txt
+echo pyinstaller >> requirements.txt
+
 
 # Update version in setup script
 echo "Update version number in setup script..."

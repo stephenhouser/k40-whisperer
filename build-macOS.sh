@@ -122,6 +122,7 @@ PYTHON=
 # Install requirements
 echo "Install Dependencies..."
 pip3 install -r requirements.txt
+pip3 install pyinstaller
 check_failure "Failed to install python requirements"
 
 echo "Build macOS Application Bundle..."
