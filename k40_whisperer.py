@@ -2,7 +2,7 @@
 """
     K40 Whisperer
 
-    Copyright (C) <2017-2021>  <Scorch>
+    Copyright (C) <2017-2023>  <Scorch>
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-version = '0.57'
+version = '0.64'
 title_text = "K40 Whisperer V"+version
 
 import sys
@@ -156,7 +156,11 @@ class Application(Frame):
         self.master.bind('<F5>', self.KEY_F5)
         self.master.bind('<F6>', self.KEY_F6)
         self.master.bind('<Home>', self.Home)
-        
+
+        #self.master.bind('<Control-R>', self.Raster_Eng)
+        #self.master.bind('<Control-V>', self.Vector_Eng)
+        #self.master.bind('<Control-C>', self.Vector_Cut)
+        #self.master.bind('<Control-G>', self.Gcode_Cut)
 
         self.master.bind('<Control-Left>'  , self.Move_Left)
         self.master.bind('<Control-Right>' , self.Move_Right)
@@ -205,6 +209,7 @@ class Application(Frame):
 
         #####
         self.master.bind('<Control-i>' , self.Initialize_Laser)
+        self.master.bind('<Control-f>' , self.Unfreeze_Laser)
         self.master.bind('<Control-o>' , self.menu_File_Open_Design)
         self.master.bind('<Control-l>' , self.menu_Reload_Design)
         self.master.bind('<Control-h>' , self.Home)
@@ -237,6 +242,8 @@ class Application(Frame):
         self.pre_pr_crc   = BooleanVar()
         self.inside_first = BooleanVar()
         self.rotary       = BooleanVar()
+        self.reduced_mem  = BooleanVar()
+        self.wait         = BooleanVar()
         
 
         self.ht_size    = StringVar()
@@ -332,6 +339,8 @@ class Application(Frame):
         self.pre_pr_crc.set(1)
         self.inside_first.set(1)
         self.rotary.set(0)
+        self.reduced_mem.set(0)
+        self.wait.set(1)
         
         self.ht_size.set(500)
 
@@ -742,6 +751,7 @@ class Application(Frame):
         top_Tools.add("command", label = "Trace Design Boundary <Ctrl-t>", command = self.TRACE_Settings_Window)
         top_Tools.add_separator()
         top_Tools.add("command", label = "Initialize Laser <Ctrl-i>", command = self.Initialize_Laser)
+        top_Tools.add("command", label = "Unfreeze Laser <Ctrl-f>"  , command = self.Unfreeze_Laser)
         top_Tools.add_cascade(label="USB", menu=USBmenu)
         USBmenu.add("command", label = "Reset USB", command = self.Reset)
         USBmenu.add("command", label = "Release USB", command = self.Release_USB)
@@ -919,6 +929,8 @@ class Application(Frame):
         header.append('(k40_whisperer_set comb_vector   %s )'  %( int(self.comb_vector.get())   ))
         header.append('(k40_whisperer_set zoom2image    %s )'  %( int(self.zoom2image.get())    ))
         header.append('(k40_whisperer_set rotary        %s )'  %( int(self.rotary.get())        ))
+        header.append('(k40_whisperer_set reduced_mem   %s )'  %( int(self.reduced_mem.get())   ))
+        header.append('(k40_whisperer_set wait          %s )'  %( int(self.wait.get())          ))
 
         header.append('(k40_whisperer_set trace_w_laser %s )'  %( int(self.trace_w_laser.get()) ))
 
@@ -1042,8 +1054,6 @@ class Application(Frame):
         
         dx = can_dx*self.PlotScale
         dy = can_dy*self.PlotScale
-        if self.HomeUR.get():
-            dx = -dx
             
         DX =  round(dx*1000)
         DY =  round(dy*1000)
@@ -1456,7 +1466,7 @@ class Application(Frame):
         return 0         # Value is a valid number
     def Entry_N_Timeouts_Callback(self, varName, index, mode):
         self.entry_set(self.Entry_N_Timeouts,self.Entry_N_Timeouts_Check(), new=1)
-
+    
     #############################
     def Entry_N_EGV_Passes_Check(self):
         try:
@@ -1710,7 +1720,11 @@ class Application(Frame):
         if fileselect != '' and fileselect != ():
             self.Open_Settings_File(fileselect)
 
-
+    def Reduced_Memory_Callback(self, varName, index, mode):
+        if self.RengData.image != None:
+             self.menu_Reload_Design()
+             #print("Reload_Design")
+    
     def menu_Reload_Design(self,event=None):
         if self.GUI_Disabled:
             return
@@ -1940,16 +1954,17 @@ class Application(Frame):
         dymils =   y_end_mils - y_start_mils
         self.Send_Rapid_Move(dxmils,dxmils)
         self.stop[0]=True
-
         
     def Open_SVG(self,filemname):
         self.resetPath()
-               
         self.SVG_FILE = filemname
+        if self.reduced_mem.get():
+            self.input_dpi = 500.0
+        else:
+            self.input_dpi = 1000.0
         svg_reader =  SVG_READER()
-        svg_reader.set_inkscape_path(self.inkscape_path.get())
-        self.input_dpi = 1000
         svg_reader.image_dpi = self.input_dpi
+        svg_reader.set_inkscape_path(self.inkscape_path.get())
         svg_reader.timout = int(float( self.ink_timeout.get())*60.0) 
         dialog_pxpi    = None
         dialog_viewbox = None
@@ -1966,7 +1981,9 @@ class Application(Frame):
                                            svg_reader.SVG_inkscape_version)
                     
                     svg_reader = SVG_READER()
+                    svg_reader.image_dpi = self.input_dpi
                     svg_reader.set_inkscape_path(self.inkscape_path.get())
+                    svg_reader.timout = int(float( self.ink_timeout.get())*60.0) 
                     if pxpi_dialog.result == None:
                         return
                     
@@ -1977,7 +1994,9 @@ class Application(Frame):
                     
             except SVG_TEXT_EXCEPTION as e:
                 svg_reader = SVG_READER()
+                svg_reader.image_dpi = self.input_dpi
                 svg_reader.set_inkscape_path(self.inkscape_path.get())
+                svg_reader.timout = int(float( self.ink_timeout.get())*60.0) 
                 self.statusMessage.set("Converting TEXT to PATHS.")
                 self.master.update()
                 svg_reader.parse_svg(self.SVG_FILE)
@@ -2079,8 +2098,7 @@ class Application(Frame):
 
                     
                 if self.halftone.get():
-                    #start = time()
-                    ht_size_mils =  round( 1000.0 / float(self.ht_size.get()) ,1)
+                    ht_size_mils =  round( self.input_dpi / float(self.ht_size.get()) ,1)
                     npixels = int( round(ht_size_mils,1) )
                     if npixels == 0:
                         return
@@ -2092,11 +2110,8 @@ class Application(Frame):
                     
                     image_temp = self.convert_halftoning(image_temp)
                     image_temp = image_temp.resize((wim,him))
-                    #print time()-start
                 else:
                     image_temp = image_temp.point(lambda x: 0 if x<128 else 255, '1')
-                    #image_temp = image_temp.convert('1',dither=Image.NONE)
-                    
                     
                 if DEBUG:
                     image_name = os.path.expanduser("~")+"/IMAGE.png"
@@ -2114,9 +2129,12 @@ class Application(Frame):
                 
                 my_hull = hull2D()
                 bignumber = 9999999;
-                Raster_step = self.get_raster_step_1000in()
+                Raster_step = int(self.get_raster_step_1000in())
                 timestamp=0
-                for i in range(0,him,Raster_step):
+                im_height_mils = int(him/self.input_dpi*1000.0)
+                for i_step in range(0,im_height_mils,Raster_step):
+                    i=floor(i_step*self.input_dpi/1000.0)
+                    #print(i_step,i)
                     stamp=int(3*time()) #update every 1/3 of a second
                     if (stamp != timestamp):
                         timestamp=stamp #interlock
@@ -2132,7 +2150,6 @@ class Application(Frame):
                         if (Reng_np[j,i] == Reng_np[j-1,i]):
                             cnt = cnt+1
                         else:
-                            #laser = "U" if Reng_np[j-1,i] > cutoff else "D"
                             if Reng_np[j-1,i]:
                                 laser = "U"
                             else:
@@ -2142,7 +2159,6 @@ class Application(Frame):
                                 
                             line.append((cnt,laser))
                             cnt=1
-                    #laser = "U" if Reng_np[j-1,i] > cutoff else "D"
                     if Reng_np[j-1,i] > cutoff:
                         laser = "U"
                     else:
@@ -2152,30 +2168,28 @@ class Application(Frame):
                         
                     line.append((cnt,laser))
                     if LEFT != bignumber and RIGHT != -bignumber:
-                        LENGTH = LENGTH + (RIGHT - LEFT)/1000.0
+                        LENGTH = LENGTH + (RIGHT - LEFT)/self.input_dpi
                         n_scanlines = n_scanlines + 1
                     
-                    y=(him-i)/1000.0
+                    y=(im_height_mils-i_step)/1000.0
                     x=0
                     if LEFT != bignumber:
-                        hcoords.append([LEFT/1000.0,y])
+                        hcoords.append([LEFT/self.input_dpi,y])
                     if RIGHT != -bignumber:
-                        hcoords.append([RIGHT/1000.0,y])
+                        hcoords.append([RIGHT/self.input_dpi,y])
                     if hcoords!=[]:
                         hcoords = my_hull.convexHullecoords(hcoords)
                         
-                    #rng = range(0,len(line),1)
                     rng = list(range(0,len(line),1))
                         
                     for i in rng:
                         seg = line[i]
-                        delta = seg[0]/1000.0
+                        delta = seg[0]/self.input_dpi
                         if seg[1]=="D":
                             loop=loop+1
                             ecoords.append([x      ,y,loop])
                             ecoords.append([x+delta,y,loop])
                         x = x + delta
-                #if ecoords!=[]:
                 self.RengData.set_ecoords(ecoords,data_sorted=True)
                 self.RengData.len=LENGTH
                 self.RengData.n_scanlines = n_scanlines
@@ -2215,7 +2229,7 @@ class Application(Frame):
     
     def get_raster_step_1000in(self):
         val_in = float(self.rast_step.get())
-        value = int(round(val_in*1000.0,1))
+        value = int(round(val_in*1000.0,1)) 
         return value
 
 
@@ -2489,6 +2503,11 @@ class Application(Frame):
 
                     elif "rotary"  in line:
                          self.rotary.set(line[line.find("rotary"):].split()[1])
+                    elif "reduced_mem"  in line:
+                         self.reduced_mem.set(line[line.find("reduced_mem"):].split()[1])
+                    elif "wait"  in line:
+                         self.wait.set(line[line.find("wait"):].split()[1])
+
                     elif "trace_w_laser"  in line:
                          self.trace_w_laser.set(line[line.find("trace_w_laser"):].split()[1])
             
@@ -2834,6 +2853,7 @@ class Application(Frame):
                     self.slow_jog(int(dxmils),int(dymils))
                 else:
                     self.k40.rapid_move(int(dxmils),int(dymils))
+
 
                 return True
             else:
@@ -3529,7 +3549,9 @@ class Application(Frame):
                                                 Rapid_Feed_Rate = Rapid_Feed,     \
                                                 use_laser=True
                                                 )
-                #self.RengData.reset_path()
+                #print(len(Raster_Eng_data))
+                Raster_Eng_data=Raster_Eng_egv_inst.strip_redundant_codes(Raster_Eng_data)
+                #print(len(Raster_Eng_data))
 
             if (operation_type.find("Gcode_Cut") > -1) and (self.GcodeData.ecoords!=[]):
                 self.statusMessage.set("Generating EGV data...")
@@ -3621,7 +3643,7 @@ class Application(Frame):
             self.k40.timeout       = int(float( self.t_timeout.get()  )) 
             self.k40.n_timeouts    = int(float( self.n_timeouts.get() ))
             time_start = time()
-            self.k40.send_data(data,self.update_gui,self.stop,num_passes,pre_process_CRC, wait_for_laser=True)
+            self.k40.send_data(data,self.update_gui,self.stop,num_passes,pre_process_CRC, wait_for_laser=self.wait.get())
             self.run_time = time()-time_start
             if DEBUG:
                 print(("Elapsed Time: %.6f" %(time()-time_start)))
@@ -3691,8 +3713,12 @@ class Application(Frame):
         line2 = "Press \"OK\" to abort any jobs currently running."
         line3 = "Press \"Cancel\" to resume."
         if self.k40 != None:
-            self.k40.pause_un_pause()
-            
+            try:
+                self.k40.pause_un_pause()
+            except:
+                if message_ask_ok_cancel("Stop Laser Job.", "\n%s\n%s" %(line2,line3)):
+                    self.stop[0]=True
+                
         if message_ask_ok_cancel("Stop Laser Job.", "%s\n\n%s\n%s" %(line1,line2,line3)):
             self.stop[0]=True
         else:
@@ -3743,6 +3769,17 @@ class Application(Frame):
             self.statusbar.configure( bg = 'red' )
             self.k40=None
             debug_message(traceback.format_exc())
+
+    def Unfreeze_Laser(self,event=None):
+        if self.GUI_Disabled:
+            return
+        if self.k40 != None:
+            try:
+                self.k40.unfreeze()
+                self.statusMessage.set("Unfreeze Complete")
+                self.statusbar.configure( bg = 'white' )
+            except:
+                pass
             
     def Unlock(self,event=None):
         if self.GUI_Disabled:
@@ -4731,7 +4768,7 @@ class Application(Frame):
     ################################################################################
     def GEN_Settings_Window(self):
         gen_width = 560
-        gen_settings = Toplevel(width=gen_width, height=560) #460+75)
+        gen_settings = Toplevel(width=gen_width, height=575) #460+75)
         gen_settings.grab_set() # Use grab_set to prevent user input in the main window
         gen_settings.focus_set()
         gen_settings.resizable(0,0)
@@ -4809,6 +4846,22 @@ class Application(Frame):
         self.Checkbutton_Preprocess_CRC.place(x=xd_entry_L, y=D_Yloc, width=75, height=23)
         self.Checkbutton_Preprocess_CRC.configure(variable=self.pre_pr_crc)
 
+        D_Yloc=D_Yloc+D_dY
+        self.Label_Reduce_Memory = Label(gen_settings,text="Reduce Memory Use")
+        self.Label_Reduce_Memory.place(x=xd_label_L, y=D_Yloc, width=w_label, height=21)
+        self.Checkbutton_Reduce_Memory = Checkbutton(gen_settings,text="(needed for large designs or low memory computers)", anchor=W)
+        self.Checkbutton_Reduce_Memory.place(x=xd_entry_L, y=D_Yloc, width=350, height=23)
+        self.Checkbutton_Reduce_Memory.configure(variable=self.reduced_mem)
+        self.reduced_mem.trace_variable("w", self.Reduced_Memory_Callback)
+
+        D_Yloc=D_Yloc+D_dY
+        self.Label_Wait = Label(gen_settings,text="Wait for Laser to Finish")
+        self.Label_Wait.place(x=xd_label_L, y=D_Yloc, width=w_label, height=21)
+        self.Checkbutton_Wait = Checkbutton(gen_settings,text="(after all data has been sent over USB)", anchor=W)
+        self.Checkbutton_Wait.place(x=xd_entry_L, y=D_Yloc, width=350, height=23)
+        self.Checkbutton_Wait.configure(variable=self.wait)
+        #self.wait.trace_variable("w", self.Wait_Callback)
+        
         #D_Yloc=D_Yloc+D_dY
         #self.Label_Timeout = Label(gen_settings,text="USB Timeout")
         #self.Label_Timeout.place(x=xd_label_L, y=D_Yloc, width=w_label, height=21)
@@ -4995,18 +5048,30 @@ class Application(Frame):
         ############
         D_Yloc=D_Yloc+D_dY 
         self.Label_Halftone_DPI      = Label(raster_settings,text="Halftone Resolution", anchor=CENTER )
-        self.Halftone_DPI_OptionMenu = OptionMenu(raster_settings, self.ht_size,
-                                            "1000",
-                                            "500",
-                                            "333",
-                                            "250",
-                                            "200",
-                                            "167",
-                                            "143",
-                                            "125")
+
+        if self.reduced_mem.get():
+            if self.ht_size == "1000": self.ht_size = "500"
+            if self.ht_size == "333":  self.ht_size = "500"
+            if self.ht_size == "200":  self.ht_size = "250"
+            if self.ht_size == "143":  self.ht_size = "167"
+            self.Halftone_DPI_OptionMenu = OptionMenu(raster_settings, self.ht_size,
+                                                "500",
+                                                "250",
+                                                "167",
+                                                "125")
+        else:
+            self.Halftone_DPI_OptionMenu = OptionMenu(raster_settings, self.ht_size,
+                                                "1000",
+                                                "500",
+                                                "333",
+                                                "250",
+                                                "200",
+                                                "167",
+                                                "143",
+                                                "125")
+
         self.Label_Halftone_DPI.place(x=xd_label_L, y=D_Yloc, width=w_label, height=21)
         self.Halftone_DPI_OptionMenu.place(x=xd_entry_L, y=D_Yloc, width=w_entry+30, height=23)
-
 
         self.Label_Halftone_u = Label(raster_settings,text="dpi", anchor=W)
         self.Label_Halftone_u.place(x=xd_units_L+30, y=D_Yloc, width=w_units, height=21)
@@ -5720,9 +5785,9 @@ except:
 Icon_Set=False
 
 try:
-    debug_message("Icon set %s" %(sys.argv[0]))
+    #debug_message("Icon set %s" %(sys.argv[0]))
     root.iconbitmap(default="emblem")
-    debug_message("Icon set worked %s" %(sys.argv[0]))
+    #debug_message("Icon set worked %s" %(sys.argv[0]))
     Icon_Set=True
 except:
     debug_message(traceback.format_exc())

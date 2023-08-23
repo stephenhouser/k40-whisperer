@@ -2,7 +2,7 @@
 '''
 This script reads/writes egv format
 
-Copyright (C) 2017-2020 Scorch www.scorchworks.com
+Copyright (C) 2017-2022 Scorch www.scorchworks.com
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -103,22 +103,6 @@ class egv:
                 self.write(self.OFF)
             self.Modal_on   = laser_on
         self.Modal_dist = 0
-
-        
-    #  The one wire CRC algorithm is derived from the OneWire.cpp Library
-    #  The library location: http://www.pjrc.com/teensy/td_libs_OneWire.html
-    def OneWireCRC(self,line):
-        crc=0
-        for i in range(len(line)):
-            inbyte=line[i]
-            for j in range(8):
-                mix = (crc ^ inbyte) & 0x01
-                crc >>= 1
-                if (mix):
-                    crc ^= 0x8C
-                inbyte >>= 1
-        return crcS
-
 
     def make_distance(self,dist_mils):
         dist_mils=float(dist_mils)
@@ -698,6 +682,7 @@ class egv:
         self.write(ord("S"))
         self.write(ord("1"))
         self.write(ord("E"))
+        self.write(ord("U"))
 
         if pad:
             self.make_dir_dist(cspad,cspad)
@@ -705,6 +690,20 @@ class egv:
         
         if laser_on:    
             self.write(self.ON)
+
+    def strip_redundant_codes(self, EGV_data):
+        E = ord('E')
+        new_data=[]
+        modal_value = -1
+        for code in EGV_data:
+            if code == modal_value and modal_value != E:
+                continue
+            elif (code == self.RIGHT) or (code == self.LEFT) or \
+                 (code == self.UP   ) or (code == self.DOWN) or \
+                 (code == self.ANGLE) or (code == E):
+                modal_value = code
+            new_data.append(code)
+        return new_data
             
         
 if __name__ == "__main__":

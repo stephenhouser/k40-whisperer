@@ -286,8 +286,34 @@ Version 0.56:
 - Added code to fix driver conflict new drivers added to Linux
 - Changed default file type to svg/dxf
 
-
 Version 0.57:
 - Fixed problem with start position (only occurred when using a custom "x scale" factor and "home in upper right")
 - Added Command line option to enable debug mode
 - Some other minor change to the way icons and internal images are handled (no change for user)
+
+Version 0.58:
+- Fixed problem with right mouse click motions that occurred when using "home in upper right"
+
+Version 0.59:
+- Now automatically removes zero length features from input files (caused unnecessary movements before)
+- Removed redundant data sent to laser during raster engraving.  Should reduce pauses for higher speed engraving.
+- Added option for reduced memory use.  This can be enabled to allow for larger designs to be loaded in K40 Whisperer or just increase speed. This option does reduce the resolution of the data coming from Inkscape 500dpi vs 1000dpi.  This should not visibly affect the output in most cases.
+
+Version 0.60:
+- Fixed scaling problem when loading an SVG file with 'Reduced Memory Use' enabled.
+  The problem only occurred if the user was prompted for additional scaling information.
+  
+Version 0.61:
+- Added option in the General Settings to disable waiting for the laser to finish the job after the last data has been sent to the laser.  This can be used to allow the user to start loading the next design as the laser finishes executing the the final data.
+
+Version 0.62:
+- Fixed problem when using M3 Nano board, new job finished code is now detected. 
+- Fixed problem when using M3 Nano board, laser no longer remains on while moving back to starting position after raster engraving.
+- Fixed registration issue between raster and vector operations when custom rapid speed was used.
+- Added Option in the Tools menu that may unfreeze the controller after a job is improperly terminated (will not always work)
+
+Version 0.63:
+- Fixed rapid moves with M3 Nano.  Rapid moves failed if the move command filled exactly one packet of data.  Sending an additional packet of data without any data after the full packet resolved the issue.
+
+Version 0.64:
+- Fixed arcs being drawn in the wrong direction when the radius value was specified as a negative number in an SVG file.

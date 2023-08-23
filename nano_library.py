@@ -2,7 +2,7 @@
 '''
 This script comunicated with the K40 Laser Cutter.
 
-Copyright (C) 2017-2020 Scorch www.scorchworks.com
+Copyright (C) 2017-2023 Scorch www.scorchworks.com
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,11 +45,12 @@ class K40_CLASS:
         self.read_length= 168
 
         #### RESPONSE CODES ####
-        self.OK             = 206
-        self.BUFFER_FULL    = 238
-        self.CRC_ERROR      = 207
-        self.TASK_COMPLETE  = 236
-        self.UNKNOWN_2      = 239 #after failed initialization followed by succesful initialization
+        self.OK               = 206
+        self.BUFFER_FULL      = 238
+        self.CRC_ERROR        = 207
+        self.TASK_COMPLETE    = 236
+        self.UNKNOWN_2        = 239 #after failed initialization followed by succesful initialization
+        self.TASK_COMPLETE_M3 = 204
         #######################
         self.hello   = [160]
         self.unlock  = [166,0,73,83,50,80,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,166,15]
@@ -98,10 +99,11 @@ class K40_CLASS:
                 else:
                     print (".",)
             
-            if response[1]==self.OK            or \
-               response[1]==self.BUFFER_FULL   or \
-               response[1]==self.CRC_ERROR     or \
-               response[1]==self.TASK_COMPLETE or \
+            if response[1]==self.OK               or \
+               response[1]==self.BUFFER_FULL      or \
+               response[1]==self.CRC_ERROR        or \
+               response[1]==self.TASK_COMPLETE    or \
+               response[1]==self.TASK_COMPLETE_M3 or \
                response[1]==self.UNKNOWN_2:
                 return response[1]
             else:
@@ -128,8 +130,19 @@ class K40_CLASS:
         self.USB_Location = None
 
     def pause_un_pause(self):
-        self.send_data([ord('P'),ord('N')])
-    
+        try:
+            self.send_data([ord('P'),ord('N')])
+        except:
+            pass
+
+    def unfreeze(self):
+        try:
+            self.send_data([ord('F'),ord('N'),ord('S'),ord('E')])
+            #print("unfreeze sent")
+        except:
+            pass
+        
+        
     #######################################################################
     #  The one wire CRC algorithm is derived from the OneWire.cpp Library
     #  The latest version of this library may be found at:
@@ -161,7 +174,7 @@ class K40_CLASS:
         NoSleep = WindowsInhibitor()
         NoSleep.inhibit()
 
-        blank   = [166,0,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,166,0]
+        blank   = [166,0,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,166,80]
         packets = []
         packet  = blank[:]
         cnt=2
@@ -203,8 +216,13 @@ class K40_CLASS:
         packet[-1]=self.OneWireCRC(packet[1:len(packet)-2])
         if not preprocess_crc:
             self.send_packet_w_error_checking(packet,update_gui,stop_calc)
+            if cnt > 31:
+                self.send_packet_w_error_checking(blank,update_gui,stop_calc)
+            
         else:
             packets.append(packet)
+            if cnt > 31:
+                packets.append(blank[:])
             update_gui("CRC data and Packets are Ready")
         packet_cnt = 0
 
@@ -283,7 +301,7 @@ class K40_CLASS:
         FINISHED = False
         while not FINISHED:
             response = self.say_hello()
-            if response == self.TASK_COMPLETE:
+            if response == self.TASK_COMPLETE or response == self.TASK_COMPLETE_M3:
                 FINISHED = True
                 break
             elif response == None:
@@ -305,6 +323,12 @@ class K40_CLASS:
     def send_packet(self,line):
         self.dev.write(self.write_addr,line,self.timeout)
 
+    def print_command(self,data):
+        for x in data:
+            sys.stdout.write(chr(x))
+        sys.stdout.write("\n")
+
+        
     def rapid_move(self,dxmils,dymils):
         if (dxmils!=0 or dymils!=0):
             data=[]
